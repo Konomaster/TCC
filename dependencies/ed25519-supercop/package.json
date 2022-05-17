@@ -1,0 +1,40 @@
+{
+  "name": "ed25519-supercop",
+  "version": "1.2.0",
+  "description": "ed25519 curve operations using a supercop/ref10 implementation",
+  "main": "index.js",
+  "gypfile": true,
+  "dependencies": {
+    "nan": "^2.0.5",
+    "node-gyp-build": "^3.3.0"
+  },
+  "scripts": {
+    "vendor": "git clone https://github.com/orlp/ed25519 vendor/ed25519",
+    "rebuild": "node-gyp rebuild",
+    "test": "tape test/*.js",
+    "prebuild": "prebuildify -a --strip",
+    "install": "node-gyp-build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/substack/ed25519-supercop.git"
+  },
+  "keywords": [
+    "ed25519",
+    "supercop",
+    "ref10",
+    "nightcracker",
+    "elliptic",
+    "curve"
+  ],
+  "author": "substack",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/substack/ed25519-supercop/issues"
+  },
+  "homepage": "https://github.com/substack/ed25519-supercop#readme",
+  "devDependencies": {
+    "prebuildify": "^2.6.1",
+    "tape": "^4.2.0"
+  }
+}

@@ -1,0 +1,1 @@
+cmd_Release/supercop.node := ln -f "Release/obj.target/supercop.node" "Release/supercop.node" 2>/dev/null || (rm -rf "Release/supercop.node" && cp -af "Release/obj.target/supercop.node" "Release/supercop.node")
