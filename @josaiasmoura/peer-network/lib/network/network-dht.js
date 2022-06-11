@@ -44,6 +44,8 @@ class NetworkDht extends NetworkBase {
         this.__controlSocket.on('message', (msg, from) => {
             _controlMessage(this,msg)
         })
+
+        this.__publicIPandPort=''        
         //(End Custom)
 
         if (!dht) {
@@ -497,12 +499,12 @@ function _notifyNewPeer(self,peer){
 
     })
     
-    if(!self.__boundSent){
+    if(!self.__boundSent && self.__publicIPandPort!=''){
     	let socketData=self.__socket.address()
     	let holeport=socketData.port
     	let holeaddress=socketData.address
     	
-    	let holeString="holeport,"+holeport+","+holeaddress
+    	let holeString="holeport,"+holeport+","+holeaddress+","+Number(self.__publicIPandPort.port)+","+self.__publicIPandPort.address
     	
     	socket.send(holeString,37710,'0.0.0.0',function(error){
     		if(error){
@@ -606,6 +608,7 @@ function _responseMessage(self,message){
 }
 
 function _sendMyCandidates(self,meAsaPeer){
+    self.__publicIPandPort=meAsaPeer.candidates[0]
 	let jsonMe=JSON.stringify(meAsaPeer)
 	//console.log("me as json")
 	//console.log(jsonMe)
