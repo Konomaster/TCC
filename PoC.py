@@ -23,7 +23,10 @@ readyToTest=False
 hole_socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 hole_port=0
 hole_address=""
+public_port=0
+public_address=""
 testDone=False
+test2Done=False
 serverReady=False
 gonnaTest=False
 
@@ -41,15 +44,19 @@ def notPing():
     global s2
     global hole_port
     global hole_address
+    global public_port
+    global public_address
     global testDone
     global serverReady
     global gonnaTest
+    global readyToTest
+    global test2Done
     testSucessfull=False
     while True:
         if listaPares==[]:
             sleep(5)
             continue
-        elif not readyToTest and hole_port>0 and not testDone:
+        elif hole_port>0 and not testDone:
             ipPeer,portaPeer,idPeer=listaPares[0].split(',')
             portaPeer=int(portaPeer)
             #tenho que saber meus candidatos ip e porta
@@ -63,14 +70,16 @@ def notPing():
 
             #proceeds to do testing
             if notPinged:
-                myMappedAddr=list(map(int,hole_address.split('.')))
+                myMappedAddr=list(map(int,public_address.split('.')))
                 peerMappedAddr=list(map(int,ipPeer.split('.')))
 
+                myPort=public_port
+                pPort=portaPeer
                 #0 to server, 1 to client
                 clientOrServer=-1
-                if hole_port>portaPeer:
+                if public_port>portaPeer:
                     clientOrServer=1
-                elif hole_port<portaPeer:
+                elif public_port<portaPeer:
                     clientOrServer=0
                 elif myMappedAddr>peerMappedAddr:
                     clientOrServer=1
@@ -120,10 +129,6 @@ def notPing():
                                 testDone=True
                                 testSucessfull=True
                         restartPeerNetwork()
-                        #talvez so fazer isso depois que peernetwork tiver reiniciado
-                        doPing = "doPing," + listaPares[0].split(',')[2]
-                        s2.sendto(doPing.encode('utf-8'), ("0.0.0.0", 37711))
-                        print("Python enviou doPing")
 
                 elif clientOrServer==0:
                     s=iperf3.Server()
@@ -148,17 +153,109 @@ def notPing():
                         testSucessfull=True
                         restartPeerNetwork()
 
-                        #talvez so fazer isso depois que peernetwork tiver reiniciado
-                        doPing = "doPing," + listaPares[0].split(',')[2]
-                        s2.sendto(doPing.encode('utf-8'), ("0.0.0.0", 37711))
-                        print("Python enviou doPing")
 
-            # se notPing tiver false
+            #talvez so fazer isso depois que peernetwork tiver reiniciado
             # to mandando continuar pingando
-            else:
-                doPing = "doPing," + listaPares[0].split(',')[2]
-                s2.sendto(doPing.encode('utf-8'), ("0.0.0.0", 37711))
-                print("Python enviou doPing")
+            doPing = "doPing," + listaPares[0].split(',')[2]
+            s2.sendto(doPing.encode('utf-8'), ("0.0.0.0", 37711))
+            print("Python enviou doPing")
+
+        elif hole_port>0 and testDone and not test2Done:
+            ipPeer,portaPeer,idPeer=listaPares[0].split(',')
+            portaPeer=int(portaPeer)
+            #tenho que saber meus candidatos ip e porta
+            #ou n
+
+            notPingus="notPing,"+idPeer
+            s2.sendto(notPingus.encode('utf-8'),("0.0.0.0",37711))
+            print("Python enviou notPing "+idPeer)
+
+            sleep(2)
+
+            #proceeds to do testing
+            if notPinged:
+                myMappedAddr=list(map(int,public_address.split('.')))
+                peerMappedAddr=list(map(int,ipPeer.split('.')))
+
+                myPort=public_port
+                pPort=portaPeer
+                #0 to server, 1 to client
+                clientOrServer=-1
+                if public_port>portaPeer:
+                    clientOrServer=0
+                elif public_port<portaPeer:
+                    clientOrServer=1
+                elif myMappedAddr>peerMappedAddr:
+                    clientOrServer=0
+                elif myMappedAddr<peerMappedAddr:
+                    clientOrServer=1
+                #se porta e ip for igual da zebra kkkk
+                #to mandando continuar pingando
+                else:
+                    doPing="doPing,"+listaPares[0].split(',')[2]
+                    s2.sendto(doPing.encode('utf-8'),("0.0.0.0",37711))
+                    print("Python enviou doPing")
+
+
+                if clientOrServer==1:
+                    c=iperf3.Client()
+                    c.server_hostname=ipPeer
+                    c.port=portaPeer
+                    #hole punch eh udp
+                    c.protocol='udp'
+                    #deixar iperf determinar o tamanho do bloco
+                    c.blksize=0
+
+                    #esperar por tantos segundos o servidor falar que ja ta pronto
+                    #comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
+                    for i in range(0,3):
+                        sleep(1)
+                        if serverReady:
+                            break
+
+                    if serverReady:
+
+                        # manda msg de confirmacao
+                        gonnaString = "gonnaTest," + listaPares[0].split(',')[2]
+                        s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
+
+                        sleep(2)
+
+                        result=""
+                        try:
+                            result=c.run()
+                        except:
+                            print('exception no teste (cliente)')
+                        if result!="":
+                            if result.error:
+                                print("result error: "+result.error)
+                            else:
+                                test2Done=True
+                                testSucessfull=True
+                        restartPeerNetwork()
+
+                elif clientOrServer==0:
+                    s=iperf3.Server()
+                    s.port=hole_port
+                    #se der certo testar com = hole_address e ver se por acaso
+                    #hole_address nao eh 0.0.0.0
+                    s.bind_address='0.0.0.0'
+                    s.verbose=False
+
+                    serverString="serverReady,"+listaPares[0].split(',')[2]
+                    s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+                    #
+                    for i in range(0, 4):
+                        sleep(0.5)
+                        if gonnaTest:
+                            break
+
+                    if gonnaTest:
+                        #fechar o socket do peernetwork (ja foi feito pela biblioteca)
+                        resultServer=s.run()
+                        test2Done=True
+                        testSucessfull=True
+                        restartPeerNetwork()
 
         #    if notPinged:
         #       doPing="doPing,"+listaPares[0].split(',')[2]
@@ -179,6 +276,8 @@ def listen():
     global s2
     global hole_port
     global hole_address
+    global public_port
+    global public_address
     global notPinged
     global serverReady
     global gonnaTest
@@ -203,6 +302,8 @@ def listen():
         elif splitData[0]=="holeport":
             hole_port=int(splitData[1])
             hole_address=splitData[2]
+            public_port=int(splitData[3])
+            public_address=splitData[4]
         elif splitData[0]=="confirmNotPing":
             notPinged=True
         elif splitData[0]=="removeNotPing":
