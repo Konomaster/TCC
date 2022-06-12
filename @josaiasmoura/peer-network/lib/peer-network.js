@@ -56,6 +56,12 @@ class PeerNetwork extends EventEmitter {
         this.__network.on('offline', (peer) => {
             this.emit('offline', peer);
         });
+        
+        //(Custom)
+        this.__network.on('startTest', () => {
+            this.emit('startTest');
+        });
+        //(End Custom)
 
         Object.defineProperty(this, 'id', {
             enumerable: true,

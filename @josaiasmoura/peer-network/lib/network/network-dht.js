@@ -273,7 +273,7 @@ function _onUdpMessage(self, msg, from) {
             });
         }
         //custom
-        _preTestConfirmation(self,msgContent,peer.id)
+        _preTestConfirmation(self,msgContent.toString(),peer.id)
         //end custom
     }
 }
@@ -580,12 +580,13 @@ function _controlMessage(self,message){
 		//passar calback pro send pra fechar socket
 		self.send(Buffer.from("gonnaTest"),splitMessage[1],()=>{
 			self.__socket.close()
+			self.destroy()
 			self.emit('startTest')
 		})
 	}
 	else if (splitMessage[0]==="endTest"){
 		console.log("reiniciandoBiblioteca")
-		self.__setReady(true)
+		self.setReady(true)
 		self.__dht.listen(Number(splitMessage[1]))
 	}
 	//talvez implementar isso
@@ -630,9 +631,11 @@ function _preTestConfirmation(self,msg,peerId){
 	//recebe o gonnaTest, manda pro python e ja fecha o socket
 	if(msg==="gonnaTest"){
 		console.log("recebidoGonnaTest")
-		_responseMessage(self,"gonnaTest")
 		self.__socket.close()
+		self.destroy()
+		_responseMessage(self,"gonnaTest")
 		self.emit("startTest")
+
 	}
 }
 
