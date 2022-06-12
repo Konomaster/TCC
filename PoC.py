@@ -57,7 +57,11 @@ def notPing():
             sleep(5)
             continue
         elif hole_port>0 and not testDone:
-            ipPeer,portaPeer,idPeer=listaPares[0].split(',')
+            indexPeer=0
+            for par in listaPares:
+                if par.split(',')[0]==public_address:
+                    indexPeer+=1
+            ipPeer,portaPeer,idPeer=listaPares[indexPeer].split(',')
             portaPeer=int(portaPeer)
             #tenho que saber meus candidatos ip e porta
             #ou n
@@ -161,7 +165,11 @@ def notPing():
             print("Python enviou doPing")
 
         elif hole_port>0 and testDone and not test2Done:
-            ipPeer,portaPeer,idPeer=listaPares[0].split(',')
+            indexPeer=0
+            for par in listaPares:
+                if par.split(',')[0]==public_address:
+                    indexPeer+=1
+            ipPeer,portaPeer,idPeer=listaPares[indexPeer].split(',')
             portaPeer=int(portaPeer)
             #tenho que saber meus candidatos ip e porta
             #ou n
