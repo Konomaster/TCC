@@ -61,6 +61,12 @@ def notPing():
             for par in listaPares:
                 if par.split(',')[0]==public_address:
                     indexPeer+=1
+                else:
+                    break
+            #protecao contra null pointer
+            if indexPeer>len(listaPares)-1:
+                sleep(5)
+                continue
             ipPeer,portaPeer,idPeer=listaPares[indexPeer].split(',')
             portaPeer=int(portaPeer)
             #tenho que saber meus candidatos ip e porta
@@ -92,7 +98,7 @@ def notPing():
                 #se porta e ip for igual da zebra kkkk
                 #to mandando continuar pingando
                 else:
-                    doPing="doPing,"+listaPares[0].split(',')[2]
+                    doPing="doPing,"+listaPares[indexPeer].split(',')[2]
                     s2.sendto(doPing.encode('utf-8'),("0.0.0.0",37711))
                     print("Python enviou doPing")
 
@@ -116,7 +122,7 @@ def notPing():
                     if serverReady:
 
                         # manda msg de confirmacao
-                        gonnaString = "gonnaTest," + listaPares[0].split(',')[2]
+                        gonnaString = "gonnaTest," + listaPares[indexPeer].split(',')[2]
                         s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
                         sleep(2)
@@ -142,7 +148,7 @@ def notPing():
                     s.bind_address='0.0.0.0'
                     s.verbose=False
 
-                    serverString="serverReady,"+listaPares[0].split(',')[2]
+                    serverString="serverReady,"+listaPares[indexPeer].split(',')[2]
                     s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                     #
                     for i in range(0, 4):
@@ -160,7 +166,7 @@ def notPing():
 
             #talvez so fazer isso depois que peernetwork tiver reiniciado
             # to mandando continuar pingando
-            doPing = "doPing," + listaPares[0].split(',')[2]
+            doPing = "doPing," + listaPares[indexPeer].split(',')[2]
             s2.sendto(doPing.encode('utf-8'), ("0.0.0.0", 37711))
             print("Python enviou doPing")
 
@@ -169,6 +175,9 @@ def notPing():
             for par in listaPares:
                 if par.split(',')[0]==public_address:
                     indexPeer+=1
+            if indexPeer>len(listaPares)-1:
+                sleep(5)
+                continue
             ipPeer,portaPeer,idPeer=listaPares[indexPeer].split(',')
             portaPeer=int(portaPeer)
             #tenho que saber meus candidatos ip e porta
@@ -200,7 +209,7 @@ def notPing():
                 #se porta e ip for igual da zebra kkkk
                 #to mandando continuar pingando
                 else:
-                    doPing="doPing,"+listaPares[0].split(',')[2]
+                    doPing="doPing,"+listaPares[indexPeer].split(',')[2]
                     s2.sendto(doPing.encode('utf-8'),("0.0.0.0",37711))
                     print("Python enviou doPing")
 
@@ -224,7 +233,7 @@ def notPing():
                     if serverReady:
 
                         # manda msg de confirmacao
-                        gonnaString = "gonnaTest," + listaPares[0].split(',')[2]
+                        gonnaString = "gonnaTest," + listaPares[indexPeer].split(',')[2]
                         s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
                         sleep(2)
@@ -250,7 +259,7 @@ def notPing():
                     s.bind_address='0.0.0.0'
                     s.verbose=False
 
-                    serverString="serverReady,"+listaPares[0].split(',')[2]
+                    serverString="serverReady,"+listaPares[indexPeer].split(',')[2]
                     s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                     #
                     for i in range(0, 4):
