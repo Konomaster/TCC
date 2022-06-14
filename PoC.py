@@ -129,6 +129,7 @@ def notPing():
 
                         result=""
                         try:
+                            print("cliente iniciando teste")
                             result=c.run()
                         except:
                             print('exception no teste (cliente)')
@@ -151,13 +152,14 @@ def notPing():
                     serverString="serverReady,"+listaPares[indexPeer].split(',')[2]
                     s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                     #
-                    for i in range(0, 4):
+                    for i in range(0, 10):
                         sleep(0.5)
                         if gonnaTest:
                             break
 
                     if gonnaTest:
                         #fechar o socket do peernetwork (ja foi feito pela biblioteca)
+                        print("Servidor iniciando")
                         resultServer=s.run()
                         testDone=True
                         testSucessfull=True
