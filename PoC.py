@@ -261,6 +261,7 @@ def notPing():
                     s.bind_address='0.0.0.0'
                     s.verbose=False
 
+
                     serverString="serverReady,"+listaPares[indexPeer].split(',')[2]
                     s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                     #

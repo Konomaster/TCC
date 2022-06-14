@@ -18,7 +18,8 @@ const udp = require('dgram');
 const KEEP_ALIVE_TIME = 10000;
 const LOOKUP_TIME = 20000;
 const PEER_OFFLINE_TIME = 20000 * 6; // 2min
-const ANNOUNCE_TIME = 20000 * 12; // 4min
+const ANNOUNCE_TIME = 20000 * 6; 
+//const ANNOUNCE_TIME = 20000 * 12; // 4min
 
 class NetworkDht extends NetworkBase {
     /**
@@ -73,6 +74,9 @@ class NetworkDht extends NetworkBase {
 
         this.__socket.on('message', (msg, from) => {
             this.stats.bytesReceived += (from.size + 8 + 20);
+            if (from.address.toString()==="52.90.29.184"){
+            console.log("chegando msg de: "+from.address.toString()+" porta: "+from.port.toString());
+            }
             _onUdpMessage(this, msg, from);
         });
 
@@ -225,6 +229,9 @@ function _onUdpMessage(self, msg, from) {
     if (!peer) {
         return; // discard packet
     }
+    
+    //(Custom) remove after
+    console.log("ipp: "+from.address.toString()+" pport: "+from.port.toString()+"\n"+peer.id);
 
     // verify if msg is a valid packet
     let msgContent;
@@ -485,6 +492,11 @@ _lookup.stop = function(self) {
  */
 
 function _notifyNewPeer(self,peer){
+    if (peer.isMe || self.__publicIPandPort===''){
+    console.log("nao me envio para o python nem com hairpin");
+    return;
+    }
+
     let socket = udp.createSocket('udp4')
 
     let dadosPeer="add,"+peer.address+","+peer.port+","+peer.id
@@ -579,7 +591,7 @@ function _controlMessage(self,message){
 		console.log("enviandoGonnaTest")
 		//passar calback pro send pra fechar socket
 		self.send(Buffer.from("gonnaTest"),splitMessage[1],()=>{
-			self.__socket.close()
+			//self.__socket.close()
 			self.destroy()
 			self.emit('startTest')
 		})
@@ -631,7 +643,7 @@ function _preTestConfirmation(self,msg,peerId){
 	//recebe o gonnaTest, manda pro python e ja fecha o socket
 	if(msg==="gonnaTest"){
 		console.log("recebidoGonnaTest")
-		self.__socket.close()
+		//self.__socket.close()
 		self.destroy()
 		_responseMessage(self,"gonnaTest")
 		self.emit("startTest")
