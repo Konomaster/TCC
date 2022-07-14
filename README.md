@@ -1,6 +1,9 @@
 # TCC
 
+#################FALTOU REQUISITOS AQUI (INSTALAR IPERF3, O WRAPPER, NODE e etc)
+
 ## Para rodar a prova de conceito
+
 
 Faça clone do repositorio
 
@@ -17,3 +20,4 @@ Agora dentro da pasta "node_modules" criada dentro da pasta do repositorio:
 	
 Agora para rodar a prova de conceito:
 	python3 PoC.py
+	

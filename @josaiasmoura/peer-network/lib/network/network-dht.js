@@ -74,7 +74,7 @@ class NetworkDht extends NetworkBase {
 
         this.__socket.on('message', (msg, from) => {
             this.stats.bytesReceived += (from.size + 8 + 20);
-            if (from.address.toString()==="52.90.29.184"){
+            if (from.address.toString()==="44.204.161.68"){
             console.log("chegando msg de: "+from.address.toString()+" porta: "+from.port.toString());
             }
             _onUdpMessage(this, msg, from);
