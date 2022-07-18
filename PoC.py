@@ -25,7 +25,7 @@ hole_socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
 hole_port1=0
 hole_port2=0
 hole_address=""
-public_port=0
+public_port1=0
 public_address=""
 testDone=False
 test2Done=False
@@ -50,6 +50,7 @@ def makeTest(direcao):
     global hole_port2
     global serverRunning
 
+    tempLP=listaPares
     indexPeer = 0
     for par in listaPares:
         if par.split(',')[0] == public_address:
@@ -69,7 +70,7 @@ def makeTest(direcao):
 
     for i in range(indexPeer, len(listaPares)):
         ipC, portaC, idC = listaPares[i].split(',')
-        if ipC == ipPeer and portaC == portaPeer:
+        if ipC == ipPeer and portaC != portaPeer:
             ipPeer2=ipC
             portaPeer2=portaC
             idPeer2=idC
@@ -97,23 +98,23 @@ def makeTest(direcao):
         myMappedAddr = list(map(int, public_address.split('.')))
         peerMappedAddr = list(map(int, ipPeer.split('.')))
 
-        myPort = public_port
+        myPort = public_port1
         pPort = portaPeer
         # 0 to server, 1 to client
         clientOrServer = -1
         if direcao=="normal":
-            if public_port > portaPeer:
+            if public_port1 > portaPeer:
                 clientOrServer = 1
-            elif public_port < portaPeer:
+            elif public_port1 < portaPeer:
                 clientOrServer = 0
             elif myMappedAddr > peerMappedAddr:
                 clientOrServer = 1
             elif myMappedAddr < peerMappedAddr:
                 clientOrServer = 0
         elif direcao=="reverso":
-            if public_port > portaPeer:
+            if public_port1 > portaPeer:
                 clientOrServer = 0
-            elif public_port < portaPeer:
+            elif public_port1 < portaPeer:
                 clientOrServer = 1
             elif myMappedAddr > peerMappedAddr:
                 clientOrServer = 0
@@ -243,7 +244,7 @@ def notPing():
     global hole_port1
     global hole_port2
     global hole_address
-    global public_port
+    global public_port1
     global public_address
     global testDone
     global serverReady
@@ -252,6 +253,10 @@ def notPing():
     global test2Done
     testSucessfull=False
     while True:
+        lp=listaPares
+        hp1=hole_port1
+        hp2=hole_port2
+        td=testDone
         if listaPares!=[] and hole_port1>0 and hole_port2>0 and not testDone:
             makeTest("normal")
         elif listaPares!=[] and hole_port1>0 and hole_port2>0 and testDone and not test2Done:
@@ -277,7 +282,7 @@ def listen():
     global hole_port1
     global hole_port2
     global hole_address
-    global public_port
+    global public_port1
     global public_address
     global notPinged
     global serverReady
@@ -307,8 +312,9 @@ def listen():
                 hole_port2 = int(splitData[1])
             if hole_address=="":
                 hole_address=splitData[2]
-            if public_port==0:
-                public_port=int(splitData[3])
+            #talvez dexar sempre sobescrever as portas publicas
+            if public_port1==0:
+                public_port1=int(splitData[3])
             if public_address==0:
                 public_address=splitData[4]
         elif splitData[0]=="confirmNotPing":
