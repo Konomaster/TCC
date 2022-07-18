@@ -494,6 +494,9 @@ _lookup.stop = function(self) {
 function _notifyNewPeer(self,peer){
     if (peer.isMe || self.__publicIPandPort===''){
     console.log("nao me envio para o python nem com hairpin");
+    //colocar peer como offline, necessario pra so envia-lo
+    //pro python quando o peer souber seu ip e porto publico
+    peer.isOnline=false
     return;
     }
 
@@ -506,7 +509,7 @@ function _notifyNewPeer(self,peer){
         if(error){
             socket.close()
         }else{
-            console.log("data sent")
+            console.log("add peer sent")
         }
     })
     
