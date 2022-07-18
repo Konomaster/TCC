@@ -46,7 +46,10 @@ class NetworkDht extends NetworkBase {
             _controlMessage(this,msg)
         })
 
-        this.__publicIPandPort=''  
+        this.__publicIPandPort='' 
+        
+        this.__notifyQueue=new CallbackQueue(1e6)
+
         //(End Custom)
 
         if (!dht) {
@@ -138,6 +141,13 @@ class NetworkDht extends NetworkBase {
                 this.__queue.flush().forEach((err) => {
                     debug('[error]', err);
                 });
+                
+
+                if (this.__publicIPandPort!=''){
+                    this.__notifyQueue.flush().forEach((err)=>{
+                        debug('[error]', err);
+                    });
+                }
 
                 _lookup(this); // lookup again, after announce
             });
@@ -260,8 +270,16 @@ function _onUdpMessage(self, msg, from) {
                 self.emit('online', peer.id);
             });
         }
+
+        //(Custom)
         //maybe put inside the ifs
-        _notifyNewPeer(self,peer)
+        if(self.__dht.remoteAddress.address){
+            _notifyNewPeer(self,peer)
+        }
+        else{
+        self.__queue.push(()=>{_notifyNewPeer(self,peer)})
+        }
+        //(End Custom)
     }
 
     // packet is empty?
@@ -279,9 +297,9 @@ function _onUdpMessage(self, msg, from) {
                 self.emit('message', msgContent, peer.id);
             });
         }
-        //custom
+        //(Custom)
         _preTestConfirmation(self,msgContent.toString(),peer.id)
-        //end custom
+        //(End Custom)
     }
 }
 
@@ -494,9 +512,6 @@ _lookup.stop = function(self) {
 function _notifyNewPeer(self,peer){
     if (peer.isMe || self.__publicIPandPort===''){
     console.log("nao me envio para o python nem com hairpin");
-    //colocar peer como offline, necessario pra so envia-lo
-    //pro python quando o peer souber seu ip e porto publico
-    peer.isOnline=false
     return;
     }
 
