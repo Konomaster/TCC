@@ -31,7 +31,7 @@ class NetworkDht extends NetworkBase {
      * @param {Object} dht
      * @constructor
      */
-    constructor(dht) {
+    constructor(dht,controlPort) {
         super();
         
         //(Custom)
@@ -40,13 +40,13 @@ class NetworkDht extends NetworkBase {
         this.__notPing=[]
         
         this.__controlSocket=udp.createSocket('udp4')
-        this.__controlSocket.bind(37711)
+        this.__controlSocket.bind(controlPort)
         
         this.__controlSocket.on('message', (msg, from) => {
             _controlMessage(this,msg)
         })
 
-        this.__publicIPandPort=''        
+        this.__publicIPandPort=''  
         //(End Custom)
 
         if (!dht) {
@@ -74,7 +74,7 @@ class NetworkDht extends NetworkBase {
 
         this.__socket.on('message', (msg, from) => {
             this.stats.bytesReceived += (from.size + 8 + 20);
-            if (from.address.toString()==="44.204.161.68"){
+            if (from.address.toString()==="3.93.190.149"){
             console.log("chegando msg de: "+from.address.toString()+" porta: "+from.port.toString());
             }
             _onUdpMessage(this, msg, from);
@@ -438,7 +438,7 @@ function _keepAlive(self) {
         if (peer.isMe) return;
         //flagged peers wont be pinged
 
-        else if (self.__notPing.includes(peer.id)){
+        else if (peer.candidates[0].address === self.__publicIPandPort.address || self.__notPing.includes(peer.id)){
         	console.log("Peer que nao vai ser pingado "+peer.id+" "+peer.address+" "+peer.port)
 	        return;
         }
@@ -508,7 +508,6 @@ function _notifyNewPeer(self,peer){
         }else{
             console.log("data sent")
         }
-
     })
     
     if(!self.__boundSent && self.__publicIPandPort!=''){

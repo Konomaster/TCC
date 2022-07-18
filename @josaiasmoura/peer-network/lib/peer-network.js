@@ -28,11 +28,11 @@ class PeerNetwork extends EventEmitter {
      * @param {Array.<string>} [opts.bootstrap] Bootstrap Bitorrent DHT server (default value: router.bittorrent.com:6881, router.utorrent.com:6881, dht.transmissionbt.com:6881)
      * @param {Function} [callback] When network is alive
      */
-    constructor(opts) {
+    constructor(opts,controlPort) {
         super();
 
         this.__dht = new DhtProtocol(opts);
-        this.__network = new NetworkDht(this.__dht);
+        this.__network = new NetworkDht(this.__dht,controlPort);
         this.__queue = new CallbackQueue(1000);
 
         this.__network.on('message', (msg, from) => {
