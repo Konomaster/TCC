@@ -517,11 +517,8 @@ function _notifyNewPeer(self,peer){
     	
     	let holeString="holeport,"+holeport+","+holeaddress+","+Number(self.__publicIPandPort.port)+","+self.__publicIPandPort.address
     	
-    	socket.send(holeString,37710,'0.0.0.0',function(error){
-    		if(error){
-    			socket.close()
-    		}
-    	})
+        _responseMessage(self,holeString)
+
     	self.__boundSent=true
     }
 }
