@@ -209,7 +209,7 @@ def makeTest(direcao):
             s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
             s2.sendto(stopString.encode('utf-8'), ("0.0.0.0", 37712))
             #
-            for i in range(0, 10):
+            for i in range(0, 40):
                 sleep(0.5)
                 if gonnaTest:
                     break
@@ -225,9 +225,9 @@ def makeTest(direcao):
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
                 cmdserver="iperf3 -s -p 21201"
-                s=""
+                s=Popen(cmdserver.split())
                 try:
-                    s=Popen(cmdserver.split()).wait(20)
+                    s.wait(20)
                 except TimeoutExpired:
                     parent=psutil.Process(s.pid)
                     for child in parent.children(recursive=True):
@@ -384,7 +384,7 @@ def main():
     listener = threading.Thread(target=listen, daemon=True)
     listener.start()
 
-    listener2= threading.Thread(target=notPing, daemon=True)
+    listener2 = threading.Thread(target=notPing, daemon=True)
     listener2.start()
 
     pnthread1 = threading.Thread(target=peerNetwork1, daemon=True)
