@@ -197,7 +197,7 @@ def makeTest(direcao):
                             child.kill()
                         parent.kill()
                         print(result)
-                        print("teste concluido com sucesso")
+                        print("teste concluido com sucesso!")
                         testDone = True
                         testSucessfull = True
                 restartPeerNetwork()
