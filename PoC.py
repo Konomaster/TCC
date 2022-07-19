@@ -108,7 +108,6 @@ def makeTest(direcao):
 
     # proceeds to do testing
     if notPinged:
-        temp=public_address
         myMappedAddr = list(map(int, public_address.split('.')))
         peerMappedAddr = list(map(int, ipPeer.split('.')))
 
@@ -167,7 +166,9 @@ def makeTest(direcao):
 
                 # manda msg de confirmacao
                 gonnaString = "gonnaTest," + idPeer
+                gonnaString2 = "gonnaTest," + idPeer2
                 s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
+                s2.sendto(gonnaString2.encode('utf-8'), ("0.0.0.0", 37712))
 
                 sleep(1)
                 cmd = "socat tcp-listen:"+hole_port1+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
@@ -195,7 +196,7 @@ def makeTest(direcao):
                         for child in parent.children(recursive=True):
                             child.kill()
                         parent.kill()
-
+                        print(result)
                         print("teste concluido com sucesso")
                         testDone = True
                         testSucessfull = True
@@ -204,7 +205,9 @@ def makeTest(direcao):
         elif clientOrServer == 0:
 
             serverString = "serverReady," + idPeer
+            serverString2 = "serverReady," + idPeer2
             s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+            s2.sendto(serverString2.encode('utf-8'), ("0.0.0.0", 37712))
             #
             for i in range(0, 10):
                 sleep(0.5)
