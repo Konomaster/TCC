@@ -143,12 +143,6 @@ class NetworkDht extends NetworkBase {
                 });
                 
 
-                if (this.__publicIPandPort!=''){
-                    this.__notifyQueue.flush().forEach((err)=>{
-                        debug('[error]', err);
-                    });
-                }
-
                 _lookup(this); // lookup again, after announce
             });
         };
@@ -615,6 +609,10 @@ function _controlMessage(self,message){
 		self.setReady(true)
 		self.__dht.listen(Number(splitMessage[1]))
 	}
+    else if (splitMessage[0]==="destroy"){
+        self.destroy()
+        self.emit('startTest')
+    }
 	//talvez implementar isso
 	/*
 	else if(splitMessage[0]==="boundReceived"){

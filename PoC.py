@@ -149,7 +149,7 @@ def makeTest(direcao):
         if clientOrServer == 1:
             c = iperf3.Client()
             c.server_hostname = "localhost"
-            c.port = 21201
+            c.port = hole_port1
             # hole punch eh udp
             c.protocol = 'udp'
             # deixar iperf determinar o tamanho do bloco
@@ -166,9 +166,9 @@ def makeTest(direcao):
 
                 # manda msg de confirmacao
                 gonnaString = "gonnaTest," + idPeer
-                gonnaString2 = "gonnaTest," + idPeer2
+                stopString = "destroy"
                 s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
-                s2.sendto(gonnaString2.encode('utf-8'), ("0.0.0.0", 37712))
+                s2.sendto(stopString.encode('utf-8'), ("0.0.0.0", 37712))
 
                 sleep(1)
                 cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
@@ -205,9 +205,9 @@ def makeTest(direcao):
         elif clientOrServer == 0:
 
             serverString = "serverReady," + idPeer
-            serverString2 = "serverReady," + idPeer2
+            stopString="destroy"
             s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-            s2.sendto(serverString2.encode('utf-8'), ("0.0.0.0", 37712))
+            s2.sendto(stopString.encode('utf-8'), ("0.0.0.0", 37712))
             #
             for i in range(0, 10):
                 sleep(0.5)
@@ -225,6 +225,7 @@ def makeTest(direcao):
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
                 cmdserver="iperf3 -s -p 21201"
+                s=""
                 try:
                     s=Popen(cmdserver.split()).wait(20)
                 except TimeoutExpired:
@@ -241,7 +242,7 @@ def makeTest(direcao):
                     child.kill()
                 parent.kill()
                 print("teste concluido com sucesso")
-                restartPeerNetwork()
+            restartPeerNetwork()
 
     # talvez so fazer isso depois que peernetwork tiver reiniciado
     # to mandando continuar pingando

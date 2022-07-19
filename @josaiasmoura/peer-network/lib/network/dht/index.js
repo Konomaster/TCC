@@ -210,6 +210,7 @@ class DhtProtocol extends EventEmitter {
 
             _updateRemoteIp(this, remoteIps);
 
+            let tempPort=this.remoteAddress.port
             if (announce) {
                 this.dht.announce(
                     this.groupHash,

@@ -11,7 +11,7 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
-            "program": "${workspaceFolder}/../../../../TCC/PeerNetwork.js"
+            "program": "${workspaceFolder}/../../../../TCC/PeerNetwork2.js"
         }
     ]
 }
