@@ -108,6 +108,7 @@ def makeTest(direcao):
 
     # proceeds to do testing
     if notPinged:
+        temp=public_address
         myMappedAddr = list(map(int, public_address.split('.')))
         peerMappedAddr = list(map(int, ipPeer.split('.')))
 
@@ -328,7 +329,7 @@ def listen():
             #talvez dexar sempre sobescrever as portas publicas
             if public_port1==0:
                 public_port1=int(splitData[3])
-            if public_address==0:
+            if public_address=="":
                 public_address=splitData[4]
         elif splitData[0]=="confirmNotPing":
             notPinged=True
