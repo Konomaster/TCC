@@ -47,8 +47,21 @@ def restartPeerNetwork():
 #colocar uma flag aqui pra definir quem vai ser servidor ou cliente
 def makeTest(direcao):
 
+    global notPinged
+    global listaPares
+    global s2
+    global hole_port1
     global hole_port2
+    global hole_address
+    global public_port1
+    global public_address
+    global testDone
+    global serverReady
+    global gonnaTest
+    global readyToTest
+    global test2Done
     global serverRunning
+    testSucessfull=False
 
     tempLP=listaPares
     indexPeer = 0
@@ -156,8 +169,8 @@ def makeTest(direcao):
                 s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
                 sleep(1)
-                cmd = "socat tcp-listen:21201,reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
-                cmd2 = "socat udp-listen:21201,reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
+                cmd = "socat tcp-listen:"+hole_port1+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
+                cmd2 = "socat udp-listen:"+hole_port1+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
                 sleep(2)
@@ -370,7 +383,7 @@ def main():
     pnthread1 = threading.Thread(target=peerNetwork1, daemon=True)
     pnthread1.start()
 
-    pnthread2 = threading.Thread(target=peerNetwork2, daemon = True)
+    pnthread2 = threading.Thread(target=peerNetwork2, daemon=True)
     pnthread2.start()
     
     input("sair?")
