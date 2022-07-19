@@ -171,8 +171,8 @@ def makeTest(direcao):
                 s2.sendto(gonnaString2.encode('utf-8'), ("0.0.0.0", 37712))
 
                 sleep(1)
-                cmd = "socat tcp-listen:"+hole_port1+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
-                cmd2 = "socat udp-listen:"+hole_port1+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
+                cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
+                cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
                 sleep(2)
@@ -213,12 +213,14 @@ def makeTest(direcao):
                 sleep(0.5)
                 if gonnaTest:
                     break
-            cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
-            #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
-            #cmd2 = "socat udp-listen:21201,reuseaddr,fork tcp:localhost:21201"
-            tunnelTCP_UDP = Popen(cmd.split())
+
 
             if gonnaTest:
+                cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
+                # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
+                # cmd2 = "socat udp-listen:21201,reuseaddr,fork tcp:localhost:21201"
+                tunnelTCP_UDP = Popen(cmd.split())
+
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
