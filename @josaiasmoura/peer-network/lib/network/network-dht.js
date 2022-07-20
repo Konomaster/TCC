@@ -195,6 +195,9 @@ class NetworkDht extends NetworkBase {
      * @return {void}
      */
     send(buf, peerId, callback) {
+        if (buf==Buffer.from("serverReady")){
+            console.log("aqui deveria enviar")
+        }
         if (!this.isAlive()) {
             return callback(errors.ERR_FATAL('Network is not alive'));
         }
