@@ -201,12 +201,14 @@ class NetworkDht extends NetworkBase {
         if (!this.isAlive()) {
             return callback(errors.ERR_FATAL('Network is not alive'));
         }
-
+        console.log("Passou alive")
         callback = callback || function() {};
 
         let peer = this.__peers.getById(peerId);
-
+        
+        console.log("pegou peer")
         if (peer && peer.isOnline) {
+            console.log("passou teste peer")
             peer.sendTime = Date.now();
 
             buf = this.__security.encrypt(buf);
@@ -214,6 +216,7 @@ class NetworkDht extends NetworkBase {
             console.log("enviando pra peer na porta: ",peer.port," ip: ",peer.address);
             this.__socket.send(encoded, peer.port, peer.address, callback);
         } else {
+            console.log("entrou no fatal")
             callback(errors.ERR_FATAL('Peer is offline or not found'));
         }
     }
