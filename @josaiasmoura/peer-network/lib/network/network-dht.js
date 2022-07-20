@@ -195,6 +195,7 @@ class NetworkDht extends NetworkBase {
      * @return {void}
      */
     send(buf, peerId, callback) {
+        console.log("chegou no send")
         if (buf==Buffer.from("serverReady")){
             console.log("aqui deveria enviar")
         }
