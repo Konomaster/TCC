@@ -16,7 +16,8 @@ const AES = require('./security/aes');
 const udp = require('dgram');
 
 const KEEP_ALIVE_TIME = 10000;
-const LOOKUP_TIME = 20000;
+const LOOKUP_TIME = 5000;
+//const LOOKUP_TIME = 20000;
 const PEER_OFFLINE_TIME = 20000 * 6; // 2min
 const ANNOUNCE_TIME = 20000 * 6; 
 //const ANNOUNCE_TIME = 20000 * 12; // 4min
