@@ -1,7 +1,5 @@
 const PeerNetwork = require("@josaiasmoura/peer-network")
 
-console.log("TATAHH")
-
 let peer = new PeerNetwork({group:"madrinha",password:"madrinha"},37712)
 
 peer.on("offline",(offPeer) => {

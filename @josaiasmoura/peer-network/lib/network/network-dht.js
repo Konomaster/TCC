@@ -77,7 +77,7 @@ class NetworkDht extends NetworkBase {
 
         this.__socket.on('message', (msg, from) => {
             this.stats.bytesReceived += (from.size + 8 + 20);
-            if (from.address.toString()==="3.93.190.149"){
+            if (from.address.toString()==="45.5.168.220"){
             console.log("chegando msg de: "+from.address.toString()+" porta: "+from.port.toString());
             }
             _onUdpMessage(this, msg, from);
@@ -451,11 +451,11 @@ function _keepAlive(self) {
         //flagged peers wont be pinged
 
         else if (peer.candidates[0].address === self.__publicIPandPort.address || self.__notPing.includes(peer.id)){
-        	console.log("Peer que nao vai ser pingado "+peer.id+" "+peer.address+" "+peer.port)
+        	//console.log("Peer que nao vai ser pingado "+peer.id+" "+peer.address+" "+peer.port)
 	        return;
         }
         
-        console.log("keepAlive "+peer.id)
+        //console.log("keepAlive "+peer.id)
         _ping(self, peer);
     });
 }
@@ -610,6 +610,7 @@ function _controlMessage(self,message){
 		self.__dht.listen(Number(splitMessage[1]))
 	}
     else if (splitMessage[0]==="destroy"){
+        console.log("destruindo dht")
         self.destroy()
         self.emit('startTest')
     }
@@ -635,16 +636,7 @@ function _responseMessage(self,message){
 function _sendMyCandidates(self,meAsaPeer){
     self.__publicIPandPort=meAsaPeer.candidates[0]
 	let jsonMe=JSON.stringify(meAsaPeer)
-	//console.log("me as json")
-	//console.log(jsonMe)
-	/*
-	self.__controlSocket.send(Buffer.from(jsonMe),37710,'0.0.0.0',function(error){
-		if(error){
-		//talvez nao fechar aqui
-		self.__controlSocket.close()
-		}
-	})
-*/
+
 }
 
 function _preTestConfirmation(self,msg,peerId){
