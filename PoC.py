@@ -278,9 +278,9 @@ def notPing():
         hp2=hole_port2
         td=testDone
         if listaPares!=[] and hole_port1>0 and hole_port2>0 and not testDone:
-            makeTest("normal")
-        elif listaPares!=[] and hole_port1>0 and hole_port2>0 and testDone and not test2Done:
             makeTest("reverso")
+        elif listaPares!=[] and hole_port1>0 and hole_port2>0 and testDone and not test2Done:
+            makeTest("normal")
         sleep(5)
         #    if notPinged:
         #       doPing="doPing,"+listaPares[0].split(',')[2]
