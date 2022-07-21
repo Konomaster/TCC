@@ -246,8 +246,6 @@ function _onUdpMessage(self, msg, from) {
     //(Custom) remove after
     console.log("ipp: "+from.address.toString()+" pport: "+from.port.toString()+"\n"+peer.id);
 
-    self.hakunamatata()
-    console.log("executou o hakunamatata kkk")
     // verify if msg is a valid packet
     let msgContent;
     try {
