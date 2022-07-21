@@ -70,7 +70,7 @@ def makeTest(direcao):
 
     for i in range(0,len(listaPares)):
         par=listaPares[i].split(',')
-        if par[0] != public_address and int(par[4]) == hole_port1:
+        if par[0] != public_address and int(par[3]) == hole_port1:
             ipPeer, portaPeer, idPeer, portaCanal = listaPares[i].split(',')
 
     portaPeer = int(portaPeer)
