@@ -37,7 +37,7 @@ class NetworkDht extends NetworkBase {
         
         //(Custom)
         //flag to identify if hole punch socket info was sent to the python program
-	this.__boundSent=false
+	    this.__boundSent=false
         this.__notPing=[]
         
         this.__controlSocket=udp.createSocket('udp4')
@@ -155,6 +155,7 @@ class NetworkDht extends NetworkBase {
         }
 
         this.once('destroy', () => {
+            console.log("chegou no destroy do construtor")
             _lookup.stop(this);
             _keepAlive.stop(this);
             this.__peers.clear();
@@ -245,6 +246,8 @@ function _onUdpMessage(self, msg, from) {
     //(Custom) remove after
     console.log("ipp: "+from.address.toString()+" pport: "+from.port.toString()+"\n"+peer.id);
 
+    self.hakunamatata()
+    console.log("executou o hakunamatata kkk")
     // verify if msg is a valid packet
     let msgContent;
     try {
