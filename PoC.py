@@ -64,29 +64,32 @@ def makeTest(direcao):
     testSucessfull=False
 
     tempLP=listaPares
-    indexPeer = 0
-    for par in listaPares:
-        if par.split(',')[0] == public_address:
-            indexPeer += 1
-        else:
-            break
-    # protecao contra null pointer
-    if indexPeer > len(listaPares) - 1:
-        return
 
+    ipPeer,idPeer="",""
+    portaPeer,portaCanal=0,0
 
-    ipPeer, portaPeer, idPeer = listaPares[indexPeer].split(',')
+    for i in range(0,len(listaPares)):
+        par=listaPares[i].split(',')
+        if par[0] != public_address and int(par[4]) == hole_port1:
+            ipPeer, portaPeer, idPeer, portaCanal = listaPares[i].split(',')
+
     portaPeer = int(portaPeer)
+    portaCanal= int(portaCanal)
+
+    if portaPeer == 0:
+        return
 
     ipPeer2,idPeer2="",""
     portaPeer2=0
+    portaCanal2=0
 
-    for i in range(indexPeer, len(listaPares)):
-        ipC, portaC, idC = listaPares[i].split(',')
-        if ipC == ipPeer and portaC != portaPeer:
+    for i in range(0, len(listaPares)):
+        ipC, portaC, idC , prtC = listaPares[i].split(',')
+        if ipC == ipPeer and int(portaC) != portaPeer and int(prtC) == hole_port2:
             ipPeer2=ipC
-            portaPeer2=portaC
+            portaPeer2=int(portaC)
             idPeer2=idC
+            portaCanal2=int(prtC)
 
     if portaPeer2 == portaPeer or portaPeer2 == 0:
         return
@@ -310,7 +313,7 @@ def listen():
     if porta_udp>0:
         try:
             s2.bind(('0.0.0.0',porta_udp))
-        except:
+        except: 
             print("erro ao fazer bind do socket na porta 37710")
             #esse exit so sai da thread
             #pensar como fechar o programa se esse bind nao funcionar
@@ -321,10 +324,10 @@ def listen():
         dataa,sender = s2.recvfrom(1024)
         decodedData=dataa.decode('utf-8')
         splitData=decodedData.split(',')
-        if splitData[0]=="add" and (splitData[1]+","+splitData[2]+","+splitData[3]) not in listaPares:
-            listaPares.append((splitData[1]+","+splitData[2]+","+splitData[3]))
-        elif splitData[0]=="remove" and (splitData[1]+","+splitData[2]+","+splitData[3]) in listaPares:
-            listaPares.remove((splitData[1]+","+splitData[2]+","+splitData[3]))
+        if splitData[0]=="add" and (splitData[1]+","+splitData[2]+","+splitData[3]+","+splitData[4]) not in listaPares:
+            listaPares.append((splitData[1]+","+splitData[2]+","+splitData[3]+","+splitData[4]))
+        elif splitData[0]=="remove" and (splitData[1]+","+splitData[2]+","+splitData[3]+","+splitData[4]) in listaPares:
+            listaPares.remove((splitData[1]+","+splitData[2]+","+splitData[3]+","+splitData[4]))
         elif splitData[0]=="holeport":
             if sender[1] == 37711:
                 hole_port1 = int(splitData[1])

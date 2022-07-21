@@ -16,8 +16,8 @@ const AES = require('./security/aes');
 const udp = require('dgram');
 
 const KEEP_ALIVE_TIME = 10000;
-const LOOKUP_TIME = 5000;
-//const LOOKUP_TIME = 20000;
+//const LOOKUP_TIME = 5000;
+const LOOKUP_TIME = 20000;
 const PEER_OFFLINE_TIME = 20000 * 6; // 2min
 const ANNOUNCE_TIME = 20000 * 6; 
 //const ANNOUNCE_TIME = 20000 * 12; // 4min
@@ -330,7 +330,7 @@ function _ping(self, peer, pingNow = false) {
                 self.emit('offline', peer.id);
             });
         }
-        _notifyPeerDown(peer);
+        _notifyPeerDown(self,peer);
     }
 
     // need ping?
@@ -519,7 +519,7 @@ function _notifyNewPeer(self,peer){
 
     let socket = udp.createSocket('udp4')
 
-    let dadosPeer="add,"+peer.address+","+peer.port+","+peer.id
+    let dadosPeer="add,"+peer.address+","+peer.port+","+peer.id+","+self.__socket.address().port
     let dadosBinario=Buffer.from(dadosPeer)
     //let reconvert=teste.toString('utf-8')
     socket.send(dadosBinario,37710,'0.0.0.0',function(error){
@@ -554,10 +554,10 @@ function _notifyNewPeer(self,peer){
  * @return {void}
  */
 
-function _notifyPeerDown(peer){
+function _notifyPeerDown(self,peer){
     let socket = udp.createSocket('udp4')
 
-    let dadosPeer="remove,"+peer.address+","+peer.port+","+peer.id
+    let dadosPeer="remove,"+peer.address+","+peer.port+","+peer.id+","+self.__socket.addres().port
     let dadosBinario=Buffer.from(dadosPeer)
     //let reconvert=teste.toString('utf-8')
     socket.send(dadosBinario,37710,'0.0.0.0',function(error){
