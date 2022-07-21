@@ -230,7 +230,7 @@ def makeTest(direcao):
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                cmdserver="iperf3 -s -p 21201 -V -d"
+                cmdserver="iperf3 -s -p 21201"
                 s=Popen(cmdserver.split())
                 try:
                     s.wait(20)
