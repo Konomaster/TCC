@@ -121,14 +121,13 @@ class PoC:
                 self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
 
-                sleep(1)
                 #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 cmd = "socat tcp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)
                 cmd2 = "socat udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                sleep(2)
+                sleep(6)
                 result = ""
                 try:
                     print("cliente iniciando teste")
@@ -162,12 +161,12 @@ class PoC:
 
 
             if tcp_hole != 0 and udp_hole != 0:
-                socket_udp = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+                socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
                 try:
-                    socket_udp.bind(2000)
-                    socket_tcp.bind(2001)
+                    socket_udp.bind(("0.0.0.0", 2000))
+                    socket_tcp.bind(("0.0.0.0", 2001))
                 except:
                     print("erro ao dar bind nos sockets do servidor")
                     return
@@ -175,8 +174,8 @@ class PoC:
                 keep_udp = KeepHoleAlive(socket_udp,5)
                 keep_tcp = KeepHoleAlive(socket_tcp,5)
 
-                keep_udp.run()
-                keep_tcp.run()
+                keep_udp.start()
+                keep_tcp.start()
             else:
                 print("erro ao abrir buracos")
                 return
@@ -196,6 +195,8 @@ class PoC:
                 #para o keep alive dos buracos
                 keep_tcp.stop()
                 keep_udp.stop()
+                keep_tcp.join()
+                keep_udp.join()
                 socket_tcp.close()
                 socket_udp.close()
                 #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
