@@ -140,7 +140,7 @@ class PoC:
                     else:
                         print(result)
                         print("teste concluido com sucesso")
-                        testDone = True
+                        self.testDone = True
                         testSucessfull = True
 
                 #fecha os tuneis
