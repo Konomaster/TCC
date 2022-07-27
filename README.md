@@ -1,6 +1,6 @@
 # TCC
 
-#################FALTOU REQUISITOS AQUI (INSTALAR IPERF3, O WRAPPER, NODE e etc)
+#################FALTOU REQUISITOS AQUI (INSTALAR IPERF3, O WRAPPER, NODE, STUNCLIENT e etc)
 
 ## Para rodar a prova de conceito
 

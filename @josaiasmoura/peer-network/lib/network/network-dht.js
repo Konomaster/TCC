@@ -15,10 +15,12 @@ const AES = require('./security/aes');
 //custom requires
 const udp = require('dgram');
 
-const KEEP_ALIVE_TIME = 10000;
-//const LOOKUP_TIME = 5000;
+//const KEEP_ALIVE_TIME = 10000;
+const KEEP_ALIVE_TIME = 5000;
+//const LOOKUP_TIME = 2000;
 const LOOKUP_TIME = 20000;
-const PEER_OFFLINE_TIME = 20000 * 6; // 2min
+//const PEER_OFFLINE_TIME = 20000 * 6; // 2min
+const PEER_OFFLINE_TIME = 20000 * 3; // 1min
 const ANNOUNCE_TIME = 20000 * 6; 
 //const ANNOUNCE_TIME = 20000 * 12; // 4min
 
@@ -117,6 +119,7 @@ class NetworkDht extends NetworkBase {
         });
 
         let onListen = () => {
+            console.log("executando listen primeira vez")
             _keepAlive(this);
             _lookup(this, () => {
                 if (dht.remoteAddress.address) {
@@ -149,13 +152,14 @@ class NetworkDht extends NetworkBase {
         };
 
         if (this.__dht.listening) {
+            console.log("passou o listening1")
             onListen();
         } else {
+            console.log("passou o listening2")
             this.__dht.once('listening', onListen);
         }
 
         this.once('destroy', () => {
-            console.log("chegou no destroy do construtor")
             _lookup.stop(this);
             _keepAlive.stop(this);
             this.__peers.clear();
@@ -197,29 +201,22 @@ class NetworkDht extends NetworkBase {
      * @return {void}
      */
     send(buf, peerId, callback) {
-        console.log("chegou no send")
-        if (buf==Buffer.from("serverReady")){
-            console.log("aqui deveria enviar")
-        }
         if (!this.isAlive()) {
             return callback(errors.ERR_FATAL('Network is not alive'));
         }
-        console.log("Passou alive")
+
         callback = callback || function() {};
 
         let peer = this.__peers.getById(peerId);
         
-        console.log("pegou peer")
+
         if (peer && peer.isOnline) {
-            console.log("passou teste peer")
             peer.sendTime = Date.now();
 
             buf = this.__security.encrypt(buf);
             let encoded = packet.encode(buf);
-            console.log("enviando pra peer na porta: ",peer.port," ip: ",peer.address);
             this.__socket.send(encoded, peer.port, peer.address, callback);
         } else {
-            console.log("entrou no fatal")
             callback(errors.ERR_FATAL('Peer is offline or not found'));
         }
     }
@@ -481,6 +478,7 @@ _keepAlive.stop = function(self) {
  * @return {void}
  */
 function _lookup(self, callback) {
+    console.log("primeiro lookup")
     if (self.isDestroyed()) {
         return;
     }
@@ -558,7 +556,7 @@ function _notifyNewPeer(self,peer){
 function _notifyPeerDown(self,peer){
     let socket = udp.createSocket('udp4')
 
-    let dadosPeer="remove,"+peer.address+","+peer.port+","+peer.id+","+self.__socket.addres().port
+    let dadosPeer="remove,"+peer.address+","+peer.port+","+peer.id+","+self.__socket.address().port
     let dadosBinario=Buffer.from(dadosPeer)
     //let reconvert=teste.toString('utf-8')
     socket.send(dadosBinario,37710,'0.0.0.0',function(error){
@@ -602,14 +600,14 @@ function _controlMessage(self,message){
 	
 	else if(splitMessage[0]==="serverReady"){
 		console.log("enviandoServerReady")
-		self.send(Buffer.from("serverReady"),splitMessage[1])
+		self.send(Buffer.from("serverReady,"+splitMessage[2]+","+splitMessage[3]),splitMessage[1])
 	}
 	else if(splitMessage[0]==="gonnaTest"){
 		console.log("enviandoGonnaTest")
 		//passar calback pro send pra fechar socket
 		self.send(Buffer.from("gonnaTest"),splitMessage[1],()=>{
 			//self.__socket.close()
-			self.destroy()
+			//self.destroy()
 			self.emit('startTest')
 		})
 	}
@@ -657,7 +655,7 @@ function _preTestConfirmation(self,msg,peerId){
 	if(msg==="gonnaTest"){
 		console.log("recebidoGonnaTest")
 		//self.__socket.close()
-		self.destroy()
+		//self.destroy()
 		_responseMessage(self,"gonnaTest")
 		self.emit("startTest")
 
