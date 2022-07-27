@@ -307,7 +307,7 @@ def peerNetwork1():
 
     filename = 'test.log'
     with io.open(filename, 'wb') as writer, io.open(filename, 'rb', 0) as reader:
-        process=Popen("DEBUG=NetworkDHT node PeerNetwork.js",stdout=writer,shell=True)
+        process=Popen("DEBUG=NetworkDHT node ../PeerNetwork.js",stdout=writer,shell=True)
         while process.poll() is None:
             sys.stdout.write(reader.read().decode("utf-8"))
             sleep(0.5)
@@ -321,7 +321,7 @@ def peerNetwork2():
 
     filename = 'test2.log'
     with io.open(filename, 'wb') as writer, io.open(filename, 'rb', 0) as reader:
-        process=Popen("DEBUG=NetworkDHT node PeerNetwork2.js",stdout=writer,shell=True)
+        process=Popen("DEBUG=NetworkDHT node ../PeerNetwork2.js",stdout=writer,shell=True)
         while process.poll() is None:
             sys.stdout.write(reader.read().decode("utf-8"))
             sleep(0.5)
