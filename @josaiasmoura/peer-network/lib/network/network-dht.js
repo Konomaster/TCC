@@ -647,9 +647,10 @@ function _sendMyCandidates(self,meAsaPeer){
 }
 
 function _preTestConfirmation(self,msg,peerId){
-	if (msg==="serverReady"){
+    let splitMsg=msg.split(',')
+	if (splitMsg[0]==="serverReady" && splitMsg.length == 3){
 		console.log("recebidoServerReady")
-		_responseMessage(self,"serverReady")
+		_responseMessage(self,msg)
 	}
 	//recebe o gonnaTest, manda pro python e ja fecha o socket
 	if(msg==="gonnaTest"){
