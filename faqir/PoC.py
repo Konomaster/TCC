@@ -225,34 +225,16 @@ class PoC:
                 parent.kill()
                 print("teste concluido com sucesso")
 
-    def notPing(self):
-        pass
-        '''
-        global notPinged
-        global listaPares
-        global s2
-        global hole_port1
-        global hole_port2
-        global hole_address
-        global public_port1
-        global public_address
-        global testDone
-        global serverReady
-        global gonnaTest
-        global readyToTest
-        global test2Done
+    def callTest(self):
         testSucessfull=False
         while True:
-            lp=listaPares
-            hp1=hole_port1
-            hp2=hole_port2
-            td=testDone
-            if listaPares!=[] and hole_port1>0 and hole_port2>0 and not testDone:
-                makeTest("normal")
-            elif listaPares!=[] and hole_port1>0 and hole_port2>0 and testDone and not test2Done:
-                makeTest("reverso")
+
+            if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
+                self.makeTest("normal")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                self.makeTest("reverso")
             sleep(5)
-        '''
+
 
     def listen(self):
         if self.porta_udp>0:
@@ -331,9 +313,11 @@ def peerNetwork2():
 def main():
     proof_of_concept=PoC()
 
-    listener = threading.Thread(target=proof_of_concept.listen, daemon=True)
-    listener.start()
+    socket_listener = threading.Thread(target=proof_of_concept.listen, daemon=True)
+    socket_listener.start()
 
+    call_test=threading.Thread(target=proof_of_concept.callTest, daemon=True)
+    call_test.start()
     #listener2 = threading.Thread(target=notPing, daemon=True)
     #listener2.start()
 
