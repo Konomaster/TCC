@@ -172,7 +172,7 @@ class PoC:
                     print("erro ao dar bind nos sockets do servidor")
                     return
 
-                keep_udp = KeepHoleAlive(socket_onFindLocal_udp,5)
+                keep_udp = KeepHoleAlive(socket_udp,5)
                 keep_tcp = KeepHoleAlive(socket_tcp,5)
 
                 keep_udp.start()
