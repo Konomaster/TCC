@@ -201,7 +201,7 @@ class PoC:
 
             if self.gonnaTest:
                 #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
-                cmd = "socat udp-listen:2001,reuseaddr tcp:localhost:2000"
+                cmd = "socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000"
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
 
