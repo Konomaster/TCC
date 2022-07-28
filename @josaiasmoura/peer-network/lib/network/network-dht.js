@@ -114,7 +114,9 @@ class NetworkDht extends NetworkBase {
                 }
 
                 // find local addresses candidates
-                _onFindLocalCandiates(this, peer, from);
+                //(Custom) 
+                //_onFindLocalCandiates(this, peer, from);
+                //(End Custom)
             }
         });
 

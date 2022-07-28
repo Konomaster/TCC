@@ -172,7 +172,7 @@ class PoC:
                     print("erro ao dar bind nos sockets do servidor")
                     return
 
-                keep_udp = KeepHoleAlive(socket_udp,5)
+                keep_udp = KeepHoleAlive(socket_onFindLocal_udp,5)
                 keep_tcp = KeepHoleAlive(socket_tcp,5)
 
                 keep_udp.start()
@@ -232,9 +232,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.makeTest("normal")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 self.makeTest("reverso")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                self.makeTest("normal")
             sleep(5)
 
 
@@ -292,20 +292,6 @@ def peerNetwork1():
     filename = 'test.log'
     with io.open(filename, 'wb') as writer, io.open(filename, 'rb', 0) as reader:
         process=Popen("DEBUG=NetworkDHT node ../PeerNetwork.js",stdout=writer,shell=True)
-        while process.poll() is None:
-            sys.stdout.write(reader.read().decode("utf-8"))
-            sleep(0.5)
-        # Read the remaining
-        sys.stdout.write(reader.read().decode("utf-8"))
-
-def peerNetwork2():
-    #process = Popen(["node", "PeerNetwork.js"], stdout=PIPE)
-    #https://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
-
-
-    filename = 'test2.log'
-    with io.open(filename, 'wb') as writer, io.open(filename, 'rb', 0) as reader:
-        process=Popen("DEBUG=NetworkDHT node ../PeerNetwork2.js",stdout=writer,shell=True)
         while process.poll() is None:
             sys.stdout.write(reader.read().decode("utf-8"))
             sleep(0.5)
