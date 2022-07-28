@@ -127,7 +127,7 @@ class PoC:
                 cmd2 = "socat udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                sleep(6)
+                sleep(8)
                 result = ""
                 try:
                     print("cliente iniciando teste")
