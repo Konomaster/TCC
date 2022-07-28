@@ -190,15 +190,15 @@ class PoC:
                 if self.gonnaTest:
                     break
 
+            # para o keep alive dos buracos
+            keep_tcp.stop()
+            keep_udp.stop()
+            keep_tcp.join()
+            keep_udp.join()
+            socket_tcp.close()
+            socket_udp.close()
 
             if self.gonnaTest:
-                #para o keep alive dos buracos
-                keep_tcp.stop()
-                keep_udp.stop()
-                keep_tcp.join()
-                keep_udp.join()
-                socket_tcp.close()
-                socket_udp.close()
                 #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
                 cmd = "socat udp-listen:2001,reuseaddr tcp:localhost:2000"
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
