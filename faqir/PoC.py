@@ -144,6 +144,7 @@ class PoC:
                         testSucessfull = True
 
                 #fecha os tuneis
+                print("MATANDO OS TUNEIS CLIENTE")
                 parent = psutil.Process(tunnelTCP_UDP.pid)
                 for child in parent.children(recursive=True):
                     child.kill()
@@ -210,7 +211,7 @@ class PoC:
                 cmdserver="iperf3 -s -p 2000"
                 s=Popen(cmdserver.split())
                 try:
-                    s.wait(20)
+                    s.wait(25)
                 except TimeoutExpired:
                     parent=psutil.Process(s.pid)
                     for child in parent.children(recursive=True):
@@ -231,9 +232,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.makeTest("normal")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 self.makeTest("reverso")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                self.makeTest("normal")
             sleep(5)
 
 
