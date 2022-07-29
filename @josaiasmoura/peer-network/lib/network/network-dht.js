@@ -655,11 +655,11 @@ function _preTestConfirmation(self,msg,peerId){
 		_responseMessage(self,msg)
 	}
 	//recebe o gonnaTest, manda pro python e ja fecha o socket
-	if(msg==="gonnaTest"){
+	if(splitMsg[0]==="gonnaTest" && splitMsg.length == 3){
 		console.log("recebidoGonnaTest")
 		//self.__socket.close()
 		//self.destroy()
-		_responseMessage(self,"gonnaTest")
+		_responseMessage(self,msg)
 		self.emit("startTest")
 
 	}

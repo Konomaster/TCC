@@ -142,7 +142,7 @@ class PoC:
             keep_udp.join()
             socket_tcp.close()
             socket_udp.close()
-            
+
             if self.serverReady:
 
                 if self.server_udp_hole == 0 or self.server_udp_hole == 0:
