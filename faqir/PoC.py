@@ -123,11 +123,11 @@ class PoC:
 
                 #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
-                cmd = "socat tcp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)
-                cmd2 = "socat udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
+                cmd = "socat -d -d tcp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)
+                cmd2 = "socat -d -d udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                sleep(8)
+                sleep(7)
                 result = ""
                 try:
                     print("cliente iniciando teste")
@@ -184,7 +184,7 @@ class PoC:
 
             serverString = "serverReady," + idPeer +","+str(udp_hole)+","+str(tcp_hole)
             self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-
+            print(serverString)
 
             for i in range(0, 40):
                 sleep(0.5)
@@ -213,6 +213,7 @@ class PoC:
                 try:
                     s.wait(25)
                 except TimeoutExpired:
+                    print("matando servs")
                     parent=psutil.Process(s.pid)
                     for child in parent.children(recursive=True):
                         child.kill()
@@ -226,6 +227,8 @@ class PoC:
                     child.kill()
                 parent.kill()
                 print("teste concluido com sucesso")
+            else:
+                print("gonnaTest nao chegou a tempo")
 
     def callTest(self):
         testSucessfull=False
