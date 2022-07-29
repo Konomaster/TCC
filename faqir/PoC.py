@@ -119,9 +119,6 @@ class PoC:
                 print("erro ao abrir buracos do cliente")
                 return
 
-            clientHoles="clientHoles,"+str(udp_hole)+","+str(tcp_hole)
-            self.s2.sendto(clientHoles.encode('utf-8'), ("0.0.0.0", 37711))
-
             c = iperf3.Client()
             c.server_hostname = "localhost"
             c.port = 2000
