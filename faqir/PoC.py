@@ -326,12 +326,12 @@ class PoC:
                 self.notPinged=False
             elif splitData[0]=="serverReady":
                 self.serverReady=True
-                self.server_udp_hole=splitData[1]
-                self.server_tcp_hole=splitData[2]
+                self.server_udp_hole=int(splitData[1])
+                self.server_tcp_hole=int(splitData[2])
             elif splitData[0]=="gonnaTest":
                 self.gonnaTest=True
-                self.client_udp_hole=splitData[1]
-                self.client_tcp_hole=splitData[2]
+                self.client_udp_hole=int(splitData[1])
+                self.client_tcp_hole=int(splitData[2])
 
             print('\rpeer: {}\n '.format(decodedData), end='')
 
