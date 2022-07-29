@@ -16,7 +16,7 @@ const AES = require('./security/aes');
 const udp = require('dgram');
 
 //const KEEP_ALIVE_TIME = 10000;
-const KEEP_ALIVE_TIME = 5000;
+const KEEP_ALIVE_TIME = 4000;
 //const LOOKUP_TIME = 2000;
 const LOOKUP_TIME = 20000;
 //const PEER_OFFLINE_TIME = 20000 * 6; // 2min
@@ -607,7 +607,7 @@ function _controlMessage(self,message){
 	else if(splitMessage[0]==="gonnaTest"){
 		console.log("enviandoGonnaTest")
 		//passar calback pro send pra fechar socket
-		self.send(Buffer.from("gonnaTest"),splitMessage[1],()=>{
+		self.send(Buffer.from("gonnaTest,"+splitMessage[2]+","+splitMessage[3]),splitMessage[1],()=>{
 			//self.__socket.close()
 			//self.destroy()
 			self.emit('startTest')

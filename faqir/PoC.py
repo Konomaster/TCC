@@ -36,6 +36,8 @@ class PoC:
         self.serverRunning=False
         self.server_udp_hole=0
         self.server_tcp_hole=0
+        self.client_udp_hole=0
+        self.client_tcp_hole=0
 
     def restartPeerNetwork(self):
 
@@ -93,6 +95,33 @@ class PoC:
 
 
         if clientOrServer == 1:
+
+            udp_hole = open_hole(2000)
+            tcp_hole = open_hole(2001)
+
+            if tcp_hole != 0 and udp_hole != 0:
+                socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+                try:
+                    socket_udp.bind(("0.0.0.0", 2000))
+                    socket_tcp.bind(("0.0.0.0", 2001))
+                except:
+                    print("erro ao dar bind nos sockets do cliente")
+                    return
+
+                keep_udp = KeepHoleAlive(socket_udp, 4)
+                keep_tcp = KeepHoleAlive(socket_tcp, 4)
+
+                keep_udp.start()
+                keep_tcp.start()
+            else:
+                print("erro ao abrir buracos do cliente")
+                return
+
+            clientHoles="clientHoles,"+str(udp_hole)+","+str(tcp_hole)
+            self.s2.sendto(clientHoles.encode('utf-8'), ("0.0.0.0", 37711))
+
             c = iperf3.Client()
             c.server_hostname = "localhost"
             c.port = 2000
@@ -117,7 +146,7 @@ class PoC:
                     return
 
                 # manda msg de confirmacao
-                gonnaString = "gonnaTest," + idPeer
+                gonnaString = "gonnaTest," + idPeer + "," +str(udp_hole)+ "," +str(tcp_hole)
                 self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
 
@@ -127,7 +156,7 @@ class PoC:
                 cmd2 = "socat -d -d udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                sleep(7)
+                sleep(6)
                 result = ""
                 try:
                     print("cliente iniciando teste")
@@ -144,7 +173,6 @@ class PoC:
                         testSucessfull = True
 
                 #fecha os tuneis
-                print("MATANDO OS TUNEIS CLIENTE")
                 parent = psutil.Process(tunnelTCP_UDP.pid)
                 for child in parent.children(recursive=True):
                     child.kill()
@@ -154,6 +182,11 @@ class PoC:
                 for child in parent.children(recursive=True):
                     child.kill()
                 parent.kill()
+
+                self.server_udp_hole = 0
+                self.server_udp_hole = 0
+
+                self.serverReady = False
 
         elif clientOrServer == 0:
 
@@ -172,13 +205,13 @@ class PoC:
                     print("erro ao dar bind nos sockets do servidor")
                     return
 
-                keep_udp = KeepHoleAlive(socket_udp,5)
-                keep_tcp = KeepHoleAlive(socket_tcp,5)
+                keep_udp = KeepHoleAlive(socket_udp,4)
+                keep_tcp = KeepHoleAlive(socket_tcp,4)
 
                 keep_udp.start()
                 keep_tcp.start()
             else:
-                print("erro ao abrir buracos")
+                print("erro ao abrir buracos do servidor")
                 return
 
 
@@ -196,6 +229,11 @@ class PoC:
             keep_udp.stop()
             keep_tcp.join()
             keep_udp.join()
+
+            if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
+                socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+
             socket_tcp.close()
             socket_udp.close()
 
@@ -229,6 +267,12 @@ class PoC:
                 print("teste concluido com sucesso")
             else:
                 print("gonnaTest nao chegou a tempo")
+
+            self.client_udp_hole = 0
+            self.client_tcp_hole = 0
+
+            #nao esqueci de resetar o gonnatest, so escolhi nao resetar
+
 
     def callTest(self):
         testSucessfull=False
@@ -282,6 +326,8 @@ class PoC:
                 self.server_tcp_hole=splitData[2]
             elif splitData[0]=="gonnaTest":
                 self.gonnaTest=True
+                self.client_udp_hole=splitData[1]
+                self.client_tcp_hole=splitData[2]
 
             print('\rpeer: {}\n '.format(decodedData), end='')
 
