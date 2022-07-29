@@ -136,6 +136,11 @@ class PoC:
                 if self.serverReady:
                     break
 
+            keep_tcp.stop()
+            keep_udp.stop()
+            keep_tcp.join()
+            keep_udp.join()
+
             if self.serverReady:
 
                 if self.server_udp_hole == 0 or self.server_udp_hole == 0:
