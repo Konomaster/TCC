@@ -153,14 +153,13 @@ class PoC:
                 gonnaString = "gonnaTest," + idPeer + "," +str(udp_hole)+ "," +str(tcp_hole)
                 self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
-
+                sleep(6)
                 #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 cmd = "socat -d -d tcp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)
                 cmd2 = "socat -d -d udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                sleep(6)
                 result = ""
                 try:
                     print("cliente iniciando teste")
