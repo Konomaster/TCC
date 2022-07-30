@@ -140,6 +140,15 @@ class PoC:
             keep_udp.stop()
             keep_tcp.join()
             keep_udp.join()
+
+
+            
+
+            # socket_tcp.sendto("o".encode('utf-8'),(ipPeer,self.server_udp_hole))
+
+
+
+
             socket_tcp.close()
             socket_udp.close()
 
