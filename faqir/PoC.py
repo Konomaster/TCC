@@ -158,8 +158,10 @@ class PoC:
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 cmd = "socat -d -d tcp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)
                 cmd2 = "socat -d -d udp-listen:"+str(2000)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
+                cmd3 = "socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000"
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
+                tunnelResponse=Popen(cmd3.split())
                 result = ""
                 try:
                     print("cliente iniciando teste")
@@ -234,8 +236,11 @@ class PoC:
             keep_udp.join()
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
-                socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                print("furando buracos para peer ip: "+ipPeer)
                 socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+
 
             socket_tcp.close()
             socket_udp.close()
@@ -243,9 +248,10 @@ class PoC:
             if self.gonnaTest:
                 #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
                 cmd = "socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000"
+                cmd2 = "socat -d -d tcp-listen:2000,reuseaddr udp:"+ipPeer+":"+str(self.client_tcp_hole)
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
-
+                #tunnelResponse = Popen(cmd2.split())
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
