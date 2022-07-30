@@ -142,7 +142,7 @@ class PoC:
             keep_udp.join()
 
 
-            
+
 
             # socket_tcp.sendto("o".encode('utf-8'),(ipPeer,self.server_udp_hole))
 
@@ -170,7 +170,7 @@ class PoC:
                 cmd3 = "socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000"
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                tunnelResponse=Popen(cmd3.split())
+                #tunnelResponse=Popen(cmd3.split())
                 result = ""
                 try:
                     print("cliente iniciando teste")
@@ -246,9 +246,10 @@ class PoC:
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
                 print("furando buracos para peer ip: "+ipPeer)
-                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
-                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+
 
 
             socket_tcp.close()
