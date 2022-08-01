@@ -168,8 +168,8 @@ class PoC:
                 sleep(6)
                 #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
-                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
-                cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr,fork udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
+                cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr,fork udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                 print(cmd)
                 print(cmd2)
@@ -264,7 +264,7 @@ class PoC:
 
             if self.gonnaTest:
 
-                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
+                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr,fork tcp:localhost:"+str(self.udp_local_port)
                 print(cmd)
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
