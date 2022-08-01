@@ -301,9 +301,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.makeTest("normal")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 self.makeTest("reverso")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                self.makeTest("normal")
             sleep(5)
 
 
