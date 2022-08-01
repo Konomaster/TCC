@@ -168,7 +168,7 @@ class PoC:
                 sleep(6)
                 #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
-                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.udp_local_port)
+                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
                 cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
                 cmd3 = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
                 tunnelTCP_UDP = Popen(cmd.split())
@@ -250,8 +250,8 @@ class PoC:
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
                 print("furando buracos para peer ip: "+ipPeer)
                 socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
-                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
-                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
 
 
