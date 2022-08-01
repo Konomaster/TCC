@@ -170,10 +170,13 @@ class PoC:
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
                 cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
-                cmd3 = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
+
+                print(cmd)
+                print(cmd2)
+
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-                #tunnelResponse=Popen(cmd3.split())
+
                 result = ""
                 try:
                     print("cliente iniciando teste")
@@ -249,8 +252,9 @@ class PoC:
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
                 print("furando buracos para peer ip: "+ipPeer)
-                socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
-                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                #socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+
                 #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
 
@@ -260,15 +264,15 @@ class PoC:
 
             if self.gonnaTest:
                 #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
-                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.iperf_port)
-                cmd2 = "socat -d -d tcp-listen:"+str(self.udp_local_port)+",reuseaddr udp:"+ipPeer+":"+str(self.client_tcp_hole)
+                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
+                print(cmd)
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
-                #tunnelResponse = Popen(cmd2.split())
+
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                cmdserver="iperf3 -s -p "+str(self.iperf_port)
+                cmdserver="iperf3 -s -p "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
                 try:
                     s.wait(25)
