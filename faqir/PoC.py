@@ -252,8 +252,8 @@ class PoC:
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
                 print("furando buracos para peer ip: "+ipPeer)
-                #socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
-                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
 
                 #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
@@ -263,7 +263,7 @@ class PoC:
             socket_udp.close()
 
             if self.gonnaTest:
-                #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
+
                 cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
                 print(cmd)
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
