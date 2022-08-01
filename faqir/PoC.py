@@ -38,8 +38,9 @@ class PoC:
         self.server_tcp_hole=0
         self.client_udp_hole=0
         self.client_tcp_hole=0
-        self.iperf_udp_port=5000
-        self.iperf_tcp_port=5001
+        self.iperf_port=5000
+        self.udp_local_port=2000
+        self.tcp_local_port=2001
 
     def restartPeerNetwork(self):
 
@@ -98,16 +99,16 @@ class PoC:
 
         if clientOrServer == 1:
 
-            udp_hole = open_hole(self.iperf_udp_port)
-            tcp_hole = open_hole(self.iperf_tcp_port)
+            udp_hole = open_hole(self.udp_local_port)
+            tcp_hole = open_hole(self.tcp_local_port)
 
             if tcp_hole != 0 and udp_hole != 0:
                 socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
                 socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
                 try:
-                    socket_udp.bind(("0.0.0.0", self.iperf_udp_port))
-                    socket_tcp.bind(("0.0.0.0", self.iperf_tcp_port))
+                    socket_udp.bind(("0.0.0.0", self.udp_local_port))
+                    socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
                 except:
                     print("erro ao dar bind nos sockets do cliente")
                     return
@@ -123,7 +124,7 @@ class PoC:
 
             c = iperf3.Client()
             c.server_hostname = "localhost"
-            c.port = self.iperf_udp_port
+            c.port = self.iperf_port
             # hole punch eh udp
             c.protocol = 'udp'
             # deixar iperf determinar o tamanho do bloco
@@ -167,9 +168,9 @@ class PoC:
                 sleep(6)
                 #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
                 #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
-                cmd = "socat -d -d tcp-listen:"+str(self.iperf_udp_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)
-                cmd2 = "socat -d -d udp-listen:"+str(self.iperf_udp_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)
-                cmd3 = "socat -d -d udp-listen:"+str(self.iperf_tcp_port)+",reuseaddr tcp:localhost:"+str(self.iperf_udp_port)
+                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.udp_local_port)
+                cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                cmd3 = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
                 #tunnelResponse=Popen(cmd3.split())
@@ -206,8 +207,8 @@ class PoC:
 
         elif clientOrServer == 0:
 
-            udp_hole = open_hole(self.iperf_udp_port)
-            tcp_hole = open_hole(self.iperf_tcp_port)
+            udp_hole = open_hole(self.udp_local_port)
+            tcp_hole = open_hole(self.tcp_local_port)
 
 
             if tcp_hole != 0 and udp_hole != 0:
@@ -215,8 +216,8 @@ class PoC:
                 socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
                 try:
-                    socket_udp.bind(("0.0.0.0", self.iperf_udp_port))
-                    socket_tcp.bind(("0.0.0.0", self.iperf_tcp_port))
+                    socket_udp.bind(("0.0.0.0", self.udp_local_port))
+                    socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
                 except:
                     print("erro ao dar bind nos sockets do servidor")
                     return
@@ -259,15 +260,15 @@ class PoC:
 
             if self.gonnaTest:
                 #cmd = "socat udp-listen:21202,reuseaddr,fork tcp:localhost:21201"
-                cmd = "socat -d -d udp-listen:"+str(self.iperf_tcp_port)+",reuseaddr tcp:localhost:"+str(self.iperf_udp_port)
-                cmd2 = "socat -d -d tcp-listen:"+str(self.iperf_udp_port)+",reuseaddr udp:"+ipPeer+":"+str(self.client_tcp_hole)
+                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.iperf_port)
+                cmd2 = "socat -d -d tcp-listen:"+str(self.udp_local_port)+",reuseaddr udp:"+ipPeer+":"+str(self.client_tcp_hole)
                 # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
                 #tunnelResponse = Popen(cmd2.split())
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                cmdserver="iperf3 -s -p "+str(self.iperf_udp_port)
+                cmdserver="iperf3 -s -p "+str(self.iperf_port)
                 s=Popen(cmdserver.split())
                 try:
                     s.wait(25)
