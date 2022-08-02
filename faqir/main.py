@@ -65,65 +65,9 @@ class PoC:
                 clientOrServer = 1
 
         if clientOrServer==1:
-            sleep(7)
-            c = iperf3.Client()
-            c.server_hostname = "localhost"
-            c.port = 5000
-            # hole punch eh udp
-            c.protocol = 'udp'
-            # deixar iperf determinar o tamanho do bloco
-            c.blksize = 0
-            # trocar esse valor depois pelo que der no tcp
-            c.bandwidth = 1000000
-
-            cmd = "socat -d -d tcp-listen:5000,reuseaddr udp:3.83.34.94:2001,sp=2001"
-            cmd2 = "socat -d -d udp-listen:5000,reuseaddr udp:3.83.34.94:2000,sp=2000"
-            '''
-                   socat -d -d tcp-listen:5000,reuseaddr udp:3.83.34.94:2001,sp=2001
-                   socat -d -d udp-listen:5000,reuseaddr udp:3.83.34.94:2000,sp=2000
-            '''
-
-            print(cmd)
-            print(cmd2)
-
-            tunnelTCP_UDP = Popen(cmd.split())
-            tunnelUDP = Popen(cmd2.split())
-
-            try:
-                c.run()
-            except:
-                print("erro no teste (cliente)")
-
-            # fecha os tuneis
-            parent = psutil.Process(tunnelTCP_UDP.pid)
-            for child in parent.children(recursive=True):
-                child.kill()
-            parent.kill()
-
-            parent = psutil.Process(tunnelUDP.pid)
-            for child in parent.children(recursive=True):
-                child.kill()
-            parent.kill()
+            print("sou cliente")
         elif clientOrServer==0:
-            cmd = "socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000"
-            #    socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000
-            print(cmd)
-
-            tunnelUDP_TCP = Popen(cmd.split())
-
-            cmdServer = "iperf3 -1 -s -p 2000"
-            iperf = Popen(cmdServer.split())
-
-            try:
-                iperf.wait(30)
-            except TimeoutExpired:
-                print("timeout do server")
-
-            parent = psutil.Process(tunnelUDP_TCP.pid)
-            for child in parent.children(recursive=True):
-                child.kill()
-            parent.kill()
-
+            print("sou servidor")
     def listen(self):
         if self.porta_udp>0:
             try:
@@ -173,6 +117,67 @@ class PoC:
                 self.makeTest("normal")
             sleep(5)
 
+    def executaCliente(self):
+        sleep(7)
+        c = iperf3.Client()
+        c.server_hostname = "localhost"
+        c.port = 5000
+        # hole punch eh udp
+        c.protocol = 'udp'
+        # deixar iperf determinar o tamanho do bloco
+        c.blksize = 0
+        # trocar esse valor depois pelo que der no tcp
+        c.bandwidth = 1000000
+
+        cmd = "socat -d -d tcp-listen:5000,reuseaddr udp:3.83.34.94:2001,sp=2001"
+        cmd2 = "socat -d -d udp-listen:5000,reuseaddr udp:3.83.34.94:2000,sp=2000"
+        '''
+               socat -d -d tcp-listen:5000,reuseaddr udp:3.83.34.94:2001,sp=2001
+               socat -d -d udp-listen:5000,reuseaddr udp:3.83.34.94:2000,sp=2000
+        '''
+
+        print(cmd)
+        print(cmd2)
+
+        tunnelTCP_UDP = Popen(cmd.split())
+        tunnelUDP = Popen(cmd2.split())
+
+        try:
+            c.run()
+        except:
+            print("erro no teste (cliente)")
+
+        # fecha os tuneis
+        parent = psutil.Process(tunnelTCP_UDP.pid)
+        for child in parent.children(recursive=True):
+            child.kill()
+        parent.kill()
+
+        parent = psutil.Process(tunnelUDP.pid)
+        for child in parent.children(recursive=True):
+            child.kill()
+        parent.kill()
+
+    def executaServer(self):
+        cmd = "socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000"
+        #    socat -d -d udp-listen:2001,reuseaddr tcp:localhost:2000
+        print(cmd)
+
+        tunnelUDP_TCP = Popen(cmd.split())
+
+        cmdServer = "iperf3 -1 -s -p 2000"
+        iperf = Popen(cmdServer.split())
+
+        try:
+            iperf.wait(30)
+        except TimeoutExpired:
+            print("timeout do server")
+
+        parent = psutil.Process(tunnelUDP_TCP.pid)
+        for child in parent.children(recursive=True):
+            child.kill()
+        parent.kill()
+
 def peerNetwork1():
     #process = Popen(["node", "PeerNetwork.js"], stdout=PIPE)
     #https://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
@@ -191,21 +196,27 @@ def peerNetwork1():
 def main():
     proof_of_concept = PoC()
 
-    socket_listener = threading.Thread(target=proof_of_concept.listen, daemon=True)
-    socket_listener.start()
+    if sys.argv[1]==1:
+        proof_of_concept.executaCliente()
+    elif sys.argv[1]==0:
+        proof_of_concept.executaServer()
 
-    call_test = threading.Thread(target=proof_of_concept.callTest, daemon=True)
-    call_test.start()
+    #socket_listener = threading.Thread(target=proof_of_concept.listen, daemon=True)
+    #socket_listener.start()
+
+    #call_test = threading.Thread(target=proof_of_concept.callTest, daemon=True)
+    #call_test.start()
     # listener2 = threading.Thread(target=notPing, daemon=True)
     # listener2.start()
 
-    pnthread1 = threading.Thread(target=peerNetwork1, daemon=True)
-    pnthread1.start()
+    #pnthread1 = threading.Thread(target=peerNetwork1, daemon=True)
+    #pnthread1.start()
 
     input("sair?")
     # continueProgram=True
     # while continueProgram:
     #    sleep(2)
+
 
 
 if __name__ == '__main__':
