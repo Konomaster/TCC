@@ -42,12 +42,6 @@ class PoC:
         self.udp_local_port=2000
         self.tcp_local_port=2001
 
-    def restartPeerNetwork(self):
-
-        restartString = "endTest," + str(self.hole_port1)
-        restartString2 = "endTest," + str(self.hole_port2)
-        self.s2.sendto(restartString.encode('utf-8'), ("0.0.0.0", 37711))
-        self.s2.sendto(restartString2.encode('utf-8'), ("0.0.0.0", 37712))
 
 
     def makeTest(self,direcao):
@@ -73,8 +67,6 @@ class PoC:
         myMappedAddr = list(map(int, self.public_address.split('.')))
         peerMappedAddr = list(map(int, ipPeer.split('.')))
 
-        myPort = self.public_port1
-        pPort = portaPeer
         # 0 to server, 1 to client
         clientOrServer = -1
         if direcao=="normal":
@@ -134,7 +126,7 @@ class PoC:
 
             # esperar por tantos segundos o servidor falar que ja ta pronto
             # comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
-            for i in range(0, 3):
+            for i in range(0, 20):
                 sleep(1)
                 if self.serverReady:
                     break
@@ -272,7 +264,7 @@ class PoC:
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                cmdserver="iperf3 -s -p "+str(self.udp_local_port)
+                cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
                 try:
                     s.wait(25)
