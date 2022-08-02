@@ -349,7 +349,6 @@ class PoC:
 
             print('\rpeer: {}\n '.format(decodedData), end='')
 
-            #if len(listaPares)>0:
 
 def peerNetwork1():
     #process = Popen(["node", "PeerNetwork.js"], stdout=PIPE)
