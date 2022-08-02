@@ -204,8 +204,6 @@ class DhtProtocol extends EventEmitter {
         };
 
         this.krpcSocket.on('response', onResponse);
-
-        console.log("opa2")
         
         this.dht.lookup(this.groupHash, (err) => {
             this.krpcSocket.removeListener('response', onResponse);
@@ -214,7 +212,6 @@ class DhtProtocol extends EventEmitter {
 
             let tempPort=this.remoteAddress.port
             if (announce) {
-                console.log("vai anunciar")
                 this.dht.announce(
                     this.groupHash,
                     this.remoteAddress.port,

@@ -126,7 +126,7 @@ class PoC:
 
             # esperar por tantos segundos o servidor falar que ja ta pronto
             # comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
-            for i in range(0, 20):
+            for i in range(0, 40):
                 sleep(1)
                 if self.serverReady:
                     break

@@ -121,7 +121,6 @@ class NetworkDht extends NetworkBase {
         });
 
         let onListen = () => {
-            console.log("executando listen primeira vez")
             _keepAlive(this);
             _lookup(this, () => {
                 if (dht.remoteAddress.address) {
@@ -154,10 +153,8 @@ class NetworkDht extends NetworkBase {
         };
 
         if (this.__dht.listening) {
-            console.log("passou o listening1")
             onListen();
         } else {
-            console.log("passou o listening2")
             this.__dht.once('listening', onListen);
         }
 
@@ -480,7 +477,6 @@ _keepAlive.stop = function(self) {
  * @return {void}
  */
 function _lookup(self, callback) {
-    console.log("primeiro lookup")
     if (self.isDestroyed()) {
         return;
     }
