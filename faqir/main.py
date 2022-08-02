@@ -196,9 +196,13 @@ def peerNetwork1():
 def main():
     proof_of_concept = PoC()
     if sys.argv[1]=="1":
-        proof_of_concept.executaCliente()
+        c=threading.Thread(target=proof_of_concept.executaCliente, daemon=True)
+        c.start()
+        #proof_of_concept.executaCliente()
     elif sys.argv[1]=="0":
-        proof_of_concept.executaServer()
+        s = threading.Thread(target=proof_of_concept.executaServer, daemon=True)
+        s.start()
+        #proof_of_concept.executaServer()
 
     #socket_listener = threading.Thread(target=proof_of_concept.listen, daemon=True)
     #socket_listener.start()
