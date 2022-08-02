@@ -116,6 +116,7 @@ class PoC:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
                 self.makeTest("normal")
+            sleep(5)
 
 def peerNetwork1():
     #process = Popen(["node", "PeerNetwork.js"], stdout=PIPE)
