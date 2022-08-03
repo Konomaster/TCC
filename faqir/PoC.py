@@ -171,8 +171,10 @@ class PoC:
 
                 result = ""
                 try:
+
                     print("cliente iniciando teste")
-                    result = c.run()
+                    Popen("echo 'cliente' | nc -u "+ipPeer+" "+self.server_udp_hole)
+                    #result = c.run()
                 except:
                     print('exception no teste (cliente)')
                 if result != "":
@@ -264,8 +266,10 @@ class PoC:
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
-                s=Popen(cmdserver.split())
+                #cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
+                #s=Popen(cmdserver.split())
+                cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
+                s = Popen(cmdserver,shell=True)
                 try:
                     s.wait(25)
                 except TimeoutExpired:
@@ -360,9 +364,17 @@ def peerNetwork1():
         process=Popen("DEBUG=NetworkDHT node ../PeerNetwork.js",stdout=writer,shell=True)
         while process.poll() is None:
             sys.stdout.write(reader.read().decode("utf-8"))
-            sleep(0.5)
+            sleep(0.1)
         # Read the remaining
         sys.stdout.write(reader.read().decode("utf-8"))
+
+def peerNetwork3():
+    #Popen("rm -f teste2.log")
+    Popen("mkfifo saida.log".split())
+    Popen("mkfifo teste2.log".split())
+    process = Popen("DEBUG=NetworkDHT node ../PeerNetwork.js 1>teste2.log 2>saida.log", shell=True)
+    Popen("tail -F teste2.log".split())
+    Popen("tail -F saida.log".split())
 
 def main():
     proof_of_concept=PoC()
@@ -375,7 +387,7 @@ def main():
     #listener2 = threading.Thread(target=notPing, daemon=True)
     #listener2.start()
 
-    pnthread1 = threading.Thread(target=peerNetwork1, daemon=True)
+    pnthread1 = threading.Thread(target=peerNetwork3, daemon=True)
     pnthread1.start()
     
     input("sair?")
