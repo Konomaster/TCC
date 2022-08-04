@@ -174,7 +174,9 @@ class PoC:
 
                     print("cliente iniciando teste")
                     #Popen("echo 'cliente' | nc -u "+ipPeer+" "+str(self.server_udp_hole),shell=True)
-                    result = c.run()
+                    #result = c.run()
+                    Popen("iperf3 -u -c localhost -p 5000".split()).wait()
+                    self.testDone = True
                 except:
                     print('exception no teste (cliente)')
                 if result != "":
@@ -259,11 +261,11 @@ class PoC:
             if self.gonnaTest:
 
                 cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
-                #cmd2 = "socat -d -d udp-listen:2000,reuseaddr udp:localhost:2000"
+                cmd2 = "socat -d -d udp-listen:2000,reuseaddr udp:localhost:3000"
                 print(cmd)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
-                #testTunnel=Popen(cmd2.split())
+                testTunnel=Popen(cmd2.split())
 
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
@@ -271,7 +273,8 @@ class PoC:
                 cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
                 #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
-                #s = Popen(cmdserver,shell=True)
+                cmdserver = "nc -u -l " + str(self.udp_local_port)
+                s = Popen(cmdserver,shell=True)
                 try:
                     s.wait(25)
                 except TimeoutExpired:
@@ -289,6 +292,10 @@ class PoC:
                     child.kill()
                 parent.kill()
 
+                parent = psutil.Process(testTunnel.pid)
+                for child in parent.children(recursive=True):
+                    child.kill()
+                parent.kill()
 
                 print("teste concluido com sucesso")
             else:
