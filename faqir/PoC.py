@@ -246,8 +246,8 @@ class PoC:
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
                 print("furando buracos para peer ip: "+ipPeer)
-                socket_udp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
-                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
                 #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
@@ -259,9 +259,11 @@ class PoC:
             if self.gonnaTest:
 
                 cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
+                cmd2 = "socat -d -d udp-listen:2000,reuseaddr udp:localhost:2000"
                 print(cmd)
-                # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
+                #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
+                testTunnel=Popen(cmd2.split())
 
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
@@ -286,6 +288,12 @@ class PoC:
                 for child in parent.children(recursive=True):
                     child.kill()
                 parent.kill()
+
+                parent = psutil.Process(testTunnel.pid)
+                for child in parent.children(recursive=True):
+                    child.kill()
+                parent.kill()
+
                 print("teste concluido com sucesso")
             else:
                 print("gonnaTest nao chegou a tempo")
@@ -385,7 +393,7 @@ def main():
     #listener2 = threading.Thread(target=notPing, daemon=True)
     #listener2.start()
 
-    pnthread1 = threading.Thread(target=peerNetwork1, daemon=True)
+    pnthread1 = threading.Thread(target=peerNetwork3, daemon=True)
     pnthread1.start()
     
     input("sair?")
