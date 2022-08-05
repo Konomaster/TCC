@@ -173,15 +173,15 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-                    ncProcess = Popen("echo 'cliente' | nc -u localhost 5000",shell=True)
+                    #ncProcess = Popen("echo 'cliente' | nc -u localhost 5000",shell=True)
                     #ncProcess=Popen("echo 'cliente' | nc -u -p 2000 "+ipPeer+" "+str(self.server_udp_hole),shell=True)
-                    sleep(24)
-                    parent = psutil.Process(ncProcess.pid)
-                    for child in parent.children(recursive=True):
-                        child.kill()
-                    parent.kill()
+                    #sleep(24)
+                    #parent = psutil.Process(ncProcess.pid)
+                    #for child in parent.children(recursive=True):
+                    #    child.kill()
+                    #parent.kill()
                     #result = c.run()
-                    #Popen("iperf3 -u -c localhost -p 5000".split()).wait()
+                    Popen("iperf3 -u -c localhost -p 5000".split()).wait()
                     self.testDone = True
                 except:
                     print('exception no teste (cliente)')
@@ -276,10 +276,10 @@ class PoC:
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                #cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
-                #s=Popen(cmdserver.split())
-                cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
-                s = Popen(cmdserver,shell=True)
+                cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
+                s=Popen(cmdserver.split())
+                #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
+                #s = Popen(cmdserver,shell=True)
                 try:
                     s.wait(25)
                 except TimeoutExpired:
@@ -386,9 +386,9 @@ def peerNetwork1():
 
 def peerNetwork3():
     #Popen("rm -f teste2.log")
-    Popen("mkfifo teste2.log".split())
-    process = Popen("DEBUG=NetworkDHT node ../PeerNetwork.js 1>teste2.log 2>&1", shell=True)
-    Popen("tail -F teste2.log".split())
+    #Popen("mkfifo teste2.log".split())
+    process = Popen("node ../PeerNetwork.js 1>teste2.log", shell=True)
+    #Popen("tail -F teste2.log".split())
 
 def main():
     proof_of_concept=PoC()
