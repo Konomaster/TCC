@@ -173,9 +173,14 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-                    #Popen("echo 'cliente' | nc -u "+ipPeer+" "+str(self.server_udp_hole),shell=True)
+                    ncProcess=Popen("echo 'cliente' | nc -u "+ipPeer+" "+str(self.server_udp_hole),shell=True)
+                    sleep(3)
+                    parent = psutil.Process(ncProcess.pid)
+                    for child in parent.children(recursive=True):
+                        child.kill()
+                    parent.kill()
                     #result = c.run()
-                    Popen("iperf3 -u -c localhost -p 5000".split()).wait()
+                    #Popen("iperf3 -u -c localhost -p 5000".split()).wait()
                     self.testDone = True
                 except:
                     print('exception no teste (cliente)')
@@ -251,7 +256,7 @@ class PoC:
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
-                socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
 
 
@@ -270,10 +275,10 @@ class PoC:
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
-                s=Popen(cmdserver.split())
-                #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
-                #s = Popen(cmdserver,shell=True)
+                #cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
+                #s=Popen(cmdserver.split())
+                cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
+                s = Popen(cmdserver,shell=True)
                 try:
                     s.wait(25)
                 except TimeoutExpired:
