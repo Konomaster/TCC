@@ -120,7 +120,7 @@ class PoC:
             # hole punch eh udp
             c.protocol = 'udp'
             # deixar iperf determinar o tamanho do bloco
-            c.blksize = 0
+            c.blksize = 1300
             #trocar esse valor depois pelo que der no tcp
             c.bandwidth=1000000
 
@@ -180,9 +180,9 @@ class PoC:
                     #for child in parent.children(recursive=True):
                     #    child.kill()
                     #parent.kill()
-                    #result = c.run()
-                    Popen("iperf3 -u -c localhost -p 5000".split()).wait()
-                    self.testDone = True
+                    result = c.run()
+                    #Popen("iperf3 -u -c localhost -p 5000 -l 1300".split()).wait()
+                    #self.testDone = True
                 except:
                     print('exception no teste (cliente)')
                 if result != "":
@@ -276,6 +276,7 @@ class PoC:
                 serverRunning=True
                 # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
+                #cmdserver = "iperf -u -s -p " + str(self.udp_local_port)
                 cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
                 #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
@@ -317,9 +318,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.makeTest("reverso")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 self.makeTest("normal")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                self.makeTest("reverso")
             sleep(5)
 
 
@@ -387,7 +388,7 @@ def peerNetwork1():
 def peerNetwork3():
     #Popen("rm -f teste2.log")
     #Popen("mkfifo teste2.log".split())
-    process = Popen("node ../PeerNetwork.js 1>teste2.log", shell=True)
+    process = Popen("node ../PeerNetwork.js", shell=True)
     #Popen("tail -F teste2.log".split())
 
 def main():
