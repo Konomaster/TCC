@@ -173,8 +173,8 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-                    ncProcess=Popen("echo 'cliente' | nc -u "+ipPeer+" "+str(self.server_udp_hole),shell=True)
-                    sleep(3)
+                    ncProcess=Popen("echo 'cliente' | nc -u -p 2000 "+ipPeer+" "+str(self.server_udp_hole),shell=True)
+                    sleep(24)
                     parent = psutil.Process(ncProcess.pid)
                     for child in parent.children(recursive=True):
                         child.kill()
