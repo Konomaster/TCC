@@ -173,7 +173,8 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-                    ncProcess=Popen("echo 'cliente' | nc -u -p 2000 "+ipPeer+" "+str(self.server_udp_hole),shell=True)
+                    ncProcess = Popen("echo 'cliente' | nc -u localhost 5000",shell=True)
+                    #ncProcess=Popen("echo 'cliente' | nc -u -p 2000 "+ipPeer+" "+str(self.server_udp_hole),shell=True)
                     sleep(24)
                     parent = psutil.Process(ncProcess.pid)
                     for child in parent.children(recursive=True):
@@ -316,9 +317,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.makeTest("normal")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 self.makeTest("reverso")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                self.makeTest("normal")
             sleep(5)
 
 
