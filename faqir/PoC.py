@@ -58,7 +58,7 @@ class PoC:
                 ipPeer, portaPeer, idPeer, portaCanal = self.listaPares[i].split(',')
 
         portaPeer = int(portaPeer)
-        portaCanal= int(portaCanal)
+        portaCanal = int(portaCanal)
 
         if portaPeer == 0:
             return
@@ -91,26 +91,13 @@ class PoC:
 
         if clientOrServer == 1:
 
-            udp_hole = open_hole(self.udp_local_port)
-            tcp_hole = open_hole(self.tcp_local_port)
+            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
+            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
 
-            if tcp_hole != 0 and udp_hole != 0:
-                socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-                try:
-                    socket_udp.bind(("0.0.0.0", self.udp_local_port))
-                    socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
-                except:
-                    print("erro ao dar bind nos sockets do cliente")
-                    return
-
-                keep_udp = KeepHoleAlive(socket_udp, 4)
-                keep_tcp = KeepHoleAlive(socket_tcp, 4)
-
-                keep_udp.start()
-                keep_tcp.start()
-            else:
+            if udp_hole == -1 or tcp_hole == -1:
+                print("erro ao dar bind nos sockets do cliente")
+                return
+            elif tcp_hole == -2 or tcp_hole == -2:
                 print("erro ao abrir buracos do cliente")
                 return
 
@@ -120,7 +107,7 @@ class PoC:
             # hole punch eh udp
             c.protocol = 'udp'
             # deixar iperf determinar o tamanho do bloco
-            c.blksize = 1300
+            c.blksize = 4096
             #trocar esse valor depois pelo que der no tcp
             c.bandwidth=1000000
 
@@ -135,15 +122,6 @@ class PoC:
             keep_udp.stop()
             keep_tcp.join()
             keep_udp.join()
-
-
-
-
-            # socket_tcp.sendto("o".encode('utf-8'),(ipPeer,self.server_udp_hole))
-
-
-
-
             socket_tcp.close()
             socket_udp.close()
 
@@ -158,8 +136,6 @@ class PoC:
                 self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
                 sleep(6)
-                #cmd = "socat tcp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer2 + ":" + str(portaPeer2)
-                #cmd2 = "socat udp-listen:"+str(hole_port1)+",reuseaddr,fork udp:" + ipPeer + ":" + str(portaPeer)
                 cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
                 cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
@@ -173,16 +149,9 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-                    #ncProcess = Popen("echo 'cliente' | nc -u localhost 5000",shell=True)
-                    #ncProcess=Popen("echo 'cliente' | nc -u -p 2000 "+ipPeer+" "+str(self.server_udp_hole),shell=True)
-                    #sleep(24)
-                    #parent = psutil.Process(ncProcess.pid)
-                    #for child in parent.children(recursive=True):
-                    #    child.kill()
-                    #parent.kill()
+
                     result = c.run()
-                    #Popen("iperf3 -u -c localhost -p 5000 -l 1300".split()).wait()
-                    #self.testDone = True
+
                 except:
                     print('exception no teste (cliente)')
                 if result != "":
@@ -195,15 +164,7 @@ class PoC:
                         testSucessfull = True
 
                 #fecha os tuneis
-                parent = psutil.Process(tunnelTCP_UDP.pid)
-                for child in parent.children(recursive=True):
-                    child.kill()
-                parent.kill()
-
-                parent = psutil.Process(tunnelUDP.pid)
-                for child in parent.children(recursive=True):
-                    child.kill()
-                parent.kill()
+                self.close_processes([tunnelTCP_UDP.pid,tunnelUDP.pid])
 
                 self.server_udp_hole = 0
                 self.server_udp_hole = 0
@@ -212,27 +173,13 @@ class PoC:
 
         elif clientOrServer == 0:
 
-            udp_hole = open_hole(self.udp_local_port)
-            tcp_hole = open_hole(self.tcp_local_port)
+            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
+            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
 
-
-            if tcp_hole != 0 and udp_hole != 0:
-                socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-                socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-                try:
-                    socket_udp.bind(("0.0.0.0", self.udp_local_port))
-                    socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
-                except:
-                    print("erro ao dar bind nos sockets do servidor")
-                    return
-
-                keep_udp = KeepHoleAlive(socket_udp,4)
-                keep_tcp = KeepHoleAlive(socket_tcp,4)
-
-                keep_udp.start()
-                keep_tcp.start()
-            else:
+            if udp_hole == -1 or tcp_hole == -1:
+                print("erro ao dar bind nos sockets do servidor")
+                return
+            elif tcp_hole == -2 or tcp_hole == -2:
                 print("erro ao abrir buracos do servidor")
                 return
 
@@ -257,9 +204,7 @@ class PoC:
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
-                #socket_tcp.sendto("o".encode('utf-8'), (ipPeer, self.client_udp_hole))
-
-
+            #SEND HOLE OPENED CONFIRMATION
 
             socket_tcp.close()
             socket_udp.close()
@@ -267,41 +212,25 @@ class PoC:
             if self.gonnaTest:
 
                 cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
-                #cmd2 = "socat -d -d udp-listen:2000,reuseaddr udp:localhost:3000"
                 print(cmd)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
-                #testTunnel=Popen(cmd2.split())
 
                 serverRunning=True
-                # fechar o socket do peernetwork (ja foi feito pela biblioteca)
                 print("Servidor iniciando")
-                #cmdserver = "iperf -u -s -p " + str(self.udp_local_port)
                 cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
-                #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
-                #s = Popen(cmdserver,shell=True)
+
                 try:
                     s.wait(25)
                 except TimeoutExpired:
                     print("matando servs")
-                    parent=psutil.Process(s.pid)
-                    for child in parent.children(recursive=True):
-                        child.kill()
-                    parent.kill()
+                    self.close_processes([s.pid])
                 self.testDone = True
                 testSucessfull = True
                 # fecha o tunel
                 self.serverRunning=False
-                parent = psutil.Process(tunnelTCP_UDP.pid)
-                for child in parent.children(recursive=True):
-                    child.kill()
-                parent.kill()
-
-#                parent = psutil.Process(testTunnel.pid)
-#                for child in parent.children(recursive=True):
-#                    child.kill()
-#                parent.kill()
+                self.close_processes([tunnelTCP_UDP.pid])
 
                 print("teste concluido com sucesso")
             else:
@@ -370,26 +299,58 @@ class PoC:
 
             print('\rpeer: {}\n '.format(decodedData), end='')
 
+    def open_udp_hole(self):
+        udp_hole = open_hole(self.udp_local_port)
 
-def peerNetwork1():
-    #process = Popen(["node", "PeerNetwork.js"], stdout=PIPE)
-    #https://stackoverflow.com/questions/18421757/live-output-from-subprocess-command
+        if udp_hole != 0:
+            socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+            try:
+                socket_udp.bind(("0.0.0.0", self.udp_local_port))
+
+            except:
+                print("erro ao dar bind no socket udp do cliente")
+                return -1, -1, -1
+
+            keep_udp = KeepHoleAlive(socket_udp, 4)
+
+            keep_udp.start()
+
+            return udp_hole, socket_udp, keep_udp
+
+        return -2, -2, -2
+
+    def open_tcp_hole(self):
+        tcp_hole = open_hole(self.tcp_local_port)
+
+        if tcp_hole != 0:
+            socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+            try:
+                socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
+            except:
+                print("erro ao dar bind no socket tcp do cliente")
+                return -1, -1, -1
+
+            keep_tcp = KeepHoleAlive(socket_tcp, 4)
+
+            keep_tcp.start()
+
+            return tcp_hole, socket_tcp, keep_tcp
+
+        return -2, -2, -2
+
+    def close_processes(self,pid_list):
+        for pid in pid_list:
+            parent=psutil.Process(pid)
+            for child in parent.children(recursive=True):
+                child.kill()
+            parent.kill()
 
 
-    filename = 'test.log'
-    with io.open(filename, 'wb') as writer, io.open(filename, 'rb', 0) as reader:
-        process=Popen("node ../PeerNetwork.js",stdout=writer,shell=True)
-        while process.poll() is None:
-            sys.stdout.write(reader.read().decode("utf-8"))
-            sleep(0.1)
-        # Read the remaining
-        sys.stdout.write(reader.read().decode("utf-8"))
-
-def peerNetwork3():
-    #Popen("rm -f teste2.log")
-    #Popen("mkfifo teste2.log".split())
+def peerNetwork():
     process = Popen("node ../PeerNetwork.js", shell=True)
-    #Popen("tail -F teste2.log".split())
+
 
 def main():
     proof_of_concept=PoC()
@@ -402,12 +363,13 @@ def main():
     #listener2 = threading.Thread(target=notPing, daemon=True)
     #listener2.start()
 
-    pnthread1 = threading.Thread(target=peerNetwork3, daemon=True)
+    pnthread1 = threading.Thread(target=peerNetwork, daemon=True)
     pnthread1.start()
     
     input("sair?")
     #continueProgram=True
-    #while continueProgram:
-    #    sleep(2)
+    #while continueProgram
+
+
 if __name__ == '__main__':
     main()
