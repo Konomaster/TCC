@@ -42,11 +42,7 @@ class PoC:
         self.udp_local_port=2000
         self.tcp_local_port=2001
 
-
-
-    def makeTest(self,direcao):
-        testSucessfull=False
-
+    def seleciona_par(self,direcao):
         tempLP=self.listaPares
 
         ipPeer,idPeer="",""
@@ -61,7 +57,7 @@ class PoC:
         portaCanal = int(portaCanal)
 
         if portaPeer == 0:
-            return
+            return "", "", -1
 
         # proceeds to do testing
         myMappedAddr = list(map(int, self.public_address.split('.')))
@@ -88,6 +84,14 @@ class PoC:
             elif myMappedAddr < peerMappedAddr:
                 clientOrServer = 1
 
+        return ipPeer, idPeer, clientOrServer
+
+    def make_tcp_test(self,direcao):
+
+        ipPeer, idPeer, clientOrServer = self.seleciona_par(direcao)
+
+        if ipPeer == "":
+            return
 
         if clientOrServer == 1:
 
@@ -97,7 +101,162 @@ class PoC:
             if udp_hole == -1 or tcp_hole == -1:
                 print("erro ao dar bind nos sockets do cliente")
                 return
+            elif udp_hole == -2 or tcp_hole == -2:
+                print("erro ao abrir buracos do cliente")
+                return
+
+            # manda msg de confirmacao
+            gonnaString = "gonnaTest," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
+            self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
+
+            c = iperf3.Client()
+            c.server_hostname = "localhost"
+            c.port = self.iperf_port
+            # hole punch eh udp
+            # deixar iperf determinar o tamanho do bloco
+            c.blksize = 1450
+            #trocar esse valor depois pelo que der no tcp
+            c.bandwidth=1000000
+
+            # esperar por tantos segundos o servidor falar que ja ta pronto
+            # comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
+            for i in range(0, 40):
+                sleep(1)
+                if self.serverReady:
+                    break
+
+            keep_tcp.stop()
+            keep_udp.stop()
+            keep_tcp.join()
+            keep_udp.join()
+            socket_tcp.close()
+            socket_udp.close()
+
+            if self.serverReady:
+
+                if self.server_udp_hole == 0 or self.server_udp_hole == 0:
+                    print("nao foram recebidos buracos do servidor")
+                    return
+
+                sleep(2)
+                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr,fork udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
+                #cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+
+                print(cmd)
+
+                tunnelTCP_UDP = Popen(cmd.split())
+
+                result = ""
+                try:
+
+                    print("cliente iniciando teste")
+
+                    result = c.run()
+
+                except:
+                    print('exception no teste (cliente)')
+                if result != "":
+                    if result.error:
+                        print("result error: " + result.error)
+                    else:
+                        print(result)
+                        print("teste concluido com sucesso")
+                        self.testDone = True
+                        testSucessfull = True
+
+                #fecha os tuneis
+                self.close_processes([tunnelTCP_UDP.pid])
+
+                self.server_udp_hole = 0
+                self.server_udp_hole = 0
+
+                self.serverReady = False
+
+        elif clientOrServer == 0:
+
+            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
+            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
+
+            if udp_hole == -1 or tcp_hole == -1:
+                print("erro ao dar bind nos sockets do servidor")
+                return
             elif tcp_hole == -2 or tcp_hole == -2:
+                print("erro ao abrir buracos do servidor")
+                return
+
+            for i in range(0, 40):
+                sleep(0.5)
+                if self.gonnaTest:
+                    break
+
+            # para o keep alive dos buracos
+            keep_tcp.stop()
+            keep_udp.stop()
+            keep_tcp.join()
+            keep_udp.join()
+
+            if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
+                print("furando buracos para peer ip: "+ipPeer)
+                socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
+                socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
+
+            socket_tcp.close()
+            socket_udp.close()
+
+            if self.gonnaTest:
+
+                serverString = "serverReady," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
+                self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+                print(serverString)
+
+                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr,fork tcp:localhost:"+str(self.udp_local_port)
+                print(cmd)
+                #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
+                tunnelTCP_UDP = Popen(cmd.split())
+
+                serverRunning=True
+                print("Servidor iniciando")
+                cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
+                s=Popen(cmdserver.split())
+
+                try:
+                    s.wait(25)
+                except TimeoutExpired:
+                    print("matando servs")
+                    self.close_processes([s.pid])
+                self.testDone = True
+                testSucessfull = True
+                # fecha o tunel
+                self.serverRunning=False
+                self.close_processes([tunnelTCP_UDP.pid])
+
+                print("teste concluido com sucesso")
+            else:
+                print("gonnaTest nao chegou a tempo")
+
+            self.client_udp_hole = 0
+            self.client_tcp_hole = 0
+
+            #nao esqueci de resetar o gonnatest, so escolhi nao resetar
+
+
+    def make_udp_test(self,direcao):
+        testSucessfull=False
+
+        ipPeer, idPeer, clientOrServer = self.seleciona_par(direcao)
+
+        if ipPeer == "":
+            return
+
+        if clientOrServer == 1:
+
+            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
+            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
+
+            if udp_hole == -1 or tcp_hole == -1:
+                print("erro ao dar bind nos sockets do cliente")
+                return
+            elif udp_hole == -2 or tcp_hole == -2:
                 print("erro ao abrir buracos do cliente")
                 return
 
@@ -179,7 +338,7 @@ class PoC:
             if udp_hole == -1 or tcp_hole == -1:
                 print("erro ao dar bind nos sockets do servidor")
                 return
-            elif tcp_hole == -2 or tcp_hole == -2:
+            elif udp_hole == -2 or tcp_hole == -2:
                 print("erro ao abrir buracos do servidor")
                 return
 
@@ -244,9 +403,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.makeTest("normal")
+                self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-                self.makeTest("reverso")
+                self.make_udp_test("reverso")
             sleep(5)
 
 
