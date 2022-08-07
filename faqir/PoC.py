@@ -91,13 +91,26 @@ class PoC:
 
         if clientOrServer == 1:
 
-            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
-            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
+            udp_hole = open_hole(self.udp_local_port)
+            tcp_hole = open_hole(self.tcp_local_port)
 
-            if udp_hole == -1 or tcp_hole == -1:
-                print("erro ao dar bind nos sockets do cliente")
-                return
-            elif tcp_hole == -2 or tcp_hole == -2:
+            if tcp_hole != 0 and udp_hole != 0:
+                socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+                try:
+                    socket_udp.bind(("0.0.0.0", self.udp_local_port))
+                    socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
+                except:
+                    print("erro ao dar bind nos sockets do cliente")
+                    return
+
+                keep_udp = KeepHoleAlive(socket_udp, 4)
+                keep_tcp = KeepHoleAlive(socket_tcp, 4)
+
+                keep_udp.start()
+                keep_tcp.start()
+            else:
                 print("erro ao abrir buracos do cliente")
                 return
 
@@ -173,13 +186,28 @@ class PoC:
 
         elif clientOrServer == 0:
 
-            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
-            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
 
-            if udp_hole == -1 or tcp_hole == -1:
-                print("erro ao dar bind nos sockets do servidor")
-                return
-            elif tcp_hole == -2 or tcp_hole == -2:
+            udp_hole = open_hole(self.udp_local_port)
+            tcp_hole = open_hole(self.tcp_local_port)
+
+
+            if tcp_hole != 0 and udp_hole != 0:
+                socket_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+                socket_tcp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+                try:
+                    socket_udp.bind(("0.0.0.0", self.udp_local_port))
+                    socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
+                except:
+                    print("erro ao dar bind nos sockets do servidor")
+                    return
+
+                keep_udp = KeepHoleAlive(socket_udp,4)
+                keep_tcp = KeepHoleAlive(socket_tcp,4)
+
+                keep_udp.start()
+                keep_tcp.start()
+            else:
                 print("erro ao abrir buracos do servidor")
                 return
 
@@ -309,16 +337,16 @@ class PoC:
                 socket_udp.bind(("0.0.0.0", self.udp_local_port))
 
             except:
-                print("erro ao dar bind no socket udp do cliente")
-                return -1, -1, -1
+                print("erro ao dar bind nos socket udp do cliente")
+                return -1, -1
 
             keep_udp = KeepHoleAlive(socket_udp, 4)
 
             keep_udp.start()
 
-            return udp_hole, socket_udp, keep_udp
+            return socket_udp, keep_udp
 
-        return -2, -2, -2
+        return -2, -2
 
     def open_tcp_hole(self):
         tcp_hole = open_hole(self.tcp_local_port)
@@ -329,16 +357,16 @@ class PoC:
             try:
                 socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
             except:
-                print("erro ao dar bind no socket tcp do cliente")
-                return -1, -1, -1
+                print("erro ao dar bind nos socket tcp do cliente")
+                return -1, -1
 
             keep_tcp = KeepHoleAlive(socket_tcp, 4)
 
             keep_tcp.start()
 
-            return tcp_hole, socket_tcp, keep_tcp
+            return socket_tcp, keep_tcp
 
-        return -2, -2, -2
+        return -2, -2
 
     def close_processes(self,pid_list):
         for pid in pid_list:
