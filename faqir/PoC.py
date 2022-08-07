@@ -357,6 +357,8 @@ class PoC:
                 print("furando buracos para peer ip: "+ipPeer)
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                #delay to make sure what i just sent dont get received by the client
+                sleep(6)
 
             socket_tcp.close()
             socket_udp.close()
