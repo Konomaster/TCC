@@ -101,6 +101,10 @@ class PoC:
                 print("erro ao abrir buracos do cliente")
                 return
 
+            # manda msg de confirmacao
+            gonnaString = "gonnaTest," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
+            self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
+
             c = iperf3.Client()
             c.server_hostname = "localhost"
             c.port = self.iperf_port
@@ -131,11 +135,7 @@ class PoC:
                     print("nao foram recebidos buracos do servidor")
                     return
 
-                # manda msg de confirmacao
-                gonnaString = "gonnaTest," + idPeer + "," +str(udp_hole)+ "," +str(tcp_hole)
-                self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
-
-                sleep(6)
+                sleep(2)
                 cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
                 cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
@@ -183,11 +183,6 @@ class PoC:
                 print("erro ao abrir buracos do servidor")
                 return
 
-
-            serverString = "serverReady," + idPeer +","+str(udp_hole)+","+str(tcp_hole)
-            self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-            print(serverString)
-
             for i in range(0, 40):
                 sleep(0.5)
                 if self.gonnaTest:
@@ -204,12 +199,14 @@ class PoC:
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
 
-            #SEND HOLE OPENED CONFIRMATION
-
             socket_tcp.close()
             socket_udp.close()
 
             if self.gonnaTest:
+
+                serverString = "serverReady," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
+                self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+                print(serverString)
 
                 cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
                 print(cmd)
