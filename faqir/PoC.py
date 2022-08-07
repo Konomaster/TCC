@@ -405,9 +405,11 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_udp_test("normal")
+                self.make_tcp_test("normal")
+                #self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-                self.make_udp_test("reverso")
+                #self.make_udp_test("reverso")
+                self.make_tcp_test("reverso")
             sleep(5)
 
 
