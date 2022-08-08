@@ -210,15 +210,16 @@ class PoC:
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
 
-                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
-                cmd2 = "socat -d -d udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
+                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:7000"
+                cmd2 = "socat -d -d udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
                 print(cmd)
+                print(cmd2)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelUDP_TCP = Popen(cmd.split())
                 tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
-                cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
+                cmdserver="iperf3 -1 -s -p 7000"
                 s=Popen(cmdserver.split())
 
                 try:
