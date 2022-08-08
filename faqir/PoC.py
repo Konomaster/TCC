@@ -153,7 +153,7 @@ class PoC:
                     print("cliente iniciando teste")
 
                     result = c.run()
-                    #Popen("iperf3 -c localhost -p 5000 -b 1000000".split())
+                    #Popen("iperf3 -c localhost -p 5000".split())
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
@@ -201,6 +201,8 @@ class PoC:
                 print("furando buracos para peer ip: "+ipPeer)
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
+                #make sure client doesnt get above messages
+                sleep(6)
 
             socket_tcp.close()
             socket_udp.close()
@@ -410,11 +412,11 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("normal")
-                #self.make_udp_test("normal")
+                #self.make_tcp_test("normal")
+                self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-                #self.make_udp_test("reverso")
-                self.make_tcp_test("reverso")
+                # self.make_tcp_test("reverso")
+                self.make_udp_test("reverso")
             sleep(5)
 
 
