@@ -114,7 +114,6 @@ class PoC:
             c.port = self.iperf_port
             # hole punch eh udp
             # deixar iperf determinar o tamanho do bloco
-            c.blksize = 1450
             #trocar esse valor depois pelo que der no tcp
             c.bandwidth=1000000
 
@@ -152,8 +151,9 @@ class PoC:
 
                     print("cliente iniciando teste")
 
-                    result = c.run()
-
+                    #result = c.run()
+                    Popen("iperf3 -c localhost -p 5000 -b 1000000")
+                    self.testDone=True
                 except:
                     print('exception no teste (cliente)')
                 if result != "":
