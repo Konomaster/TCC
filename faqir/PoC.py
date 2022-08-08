@@ -152,7 +152,7 @@ class PoC:
                     print("cliente iniciando teste")
 
                     #result = c.run()
-                    Popen("iperf3 -c localhost -p 5000 -b 1000000")
+                    Popen("iperf3 -c localhost -p 5000 -b 1000000".split())
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
