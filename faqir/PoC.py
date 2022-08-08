@@ -215,7 +215,7 @@ class PoC:
                 print(cmd)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelUDP_TCP = Popen(cmd.split())
-
+                tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
                 cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
@@ -230,7 +230,7 @@ class PoC:
                 testSucessfull = True
                 # fecha o tunel
                 self.serverRunning=False
-                self.close_processes([tunnelUDP_TCP.pid])
+                self.close_processes([tunnelUDP_TCP.pid,tunnelUDP_TCP2.pid])
 
                 print("teste concluido com sucesso")
             else:
