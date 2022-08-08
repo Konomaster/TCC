@@ -139,12 +139,13 @@ class PoC:
                     return
 
                 sleep(2)
-                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr,fork udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
-                #cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
+                cmd2 = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                 print(cmd)
 
                 tunnelTCP_UDP = Popen(cmd.split())
+                tunnelTCP_UDP2 = Popen(cmd2.split())
 
                 result = ""
                 try:
@@ -165,7 +166,7 @@ class PoC:
                         testSucessfull = True
 
                 #fecha os tuneis
-                self.close_processes([tunnelTCP_UDP.pid])
+                self.close_processes([tunnelTCP_UDP.pid,tunnelTCP_UDP2.pid])
 
                 self.server_udp_hole = 0
                 self.server_udp_hole = 0
@@ -209,10 +210,11 @@ class PoC:
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
 
-                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr,fork tcp:localhost:"+str(self.udp_local_port)
+                cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
+                cmd2 = "socat -d -d udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
                 print(cmd)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
-                tunnelTCP_UDP = Popen(cmd.split())
+                tunnelUDP_TCP = Popen(cmd.split())
 
                 serverRunning=True
                 print("Servidor iniciando")
@@ -228,7 +230,7 @@ class PoC:
                 testSucessfull = True
                 # fecha o tunel
                 self.serverRunning=False
-                self.close_processes([tunnelTCP_UDP.pid])
+                self.close_processes([tunnelUDP_TCP.pid])
 
                 print("teste concluido com sucesso")
             else:
@@ -304,6 +306,7 @@ class PoC:
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
 
+                sleep(2)
                 result = ""
                 try:
 
