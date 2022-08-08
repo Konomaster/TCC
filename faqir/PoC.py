@@ -142,6 +142,7 @@ class PoC:
                 cmd2 = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                 print(cmd)
+                print(cmd2)
 
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelTCP_UDP2 = Popen(cmd2.split())
@@ -151,8 +152,8 @@ class PoC:
 
                     print("cliente iniciando teste")
 
-                    #result = c.run()
-                    Popen("iperf3 -c localhost -p 5000 -b 1000000".split())
+                    result = c.run()
+                    #Popen("iperf3 -c localhost -p 5000 -b 1000000".split())
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
