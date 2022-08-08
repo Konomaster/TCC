@@ -113,6 +113,7 @@ class PoC:
             c.server_hostname = "localhost"
             c.port = self.iperf_port
             c.blksize=200
+            
             # hole punch eh udp
             # deixar iperf determinar o tamanho do bloco
             #trocar esse valor depois pelo que der no tcp
