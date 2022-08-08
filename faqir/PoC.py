@@ -139,8 +139,8 @@ class PoC:
                     return
 
                 sleep(2)
-                cmd = "socat -d -d -b 70000 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
-                cmd2 = "socat -d -d -b 70000 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                cmd = "socat -d -d -b 700000 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
+                cmd2 = "socat -d -d -b 700000 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                 print(cmd)
                 print(cmd2)
@@ -214,8 +214,8 @@ class PoC:
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
 
-                cmd = "socat -d -d -b 70000 udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:7000"
-                cmd2 = "socat -d -d -b 70000 udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
+                cmd = "socat -d -d -b 700000 udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:7000"
+                cmd2 = "socat -d -d -b 700000 udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
                 print(cmd)
                 print(cmd2)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
