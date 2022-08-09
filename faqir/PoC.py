@@ -112,7 +112,7 @@ class PoC:
             c = iperf3.Client()
             c.server_hostname = "localhost"
             c.port = self.iperf_port
-            #c.blksize=200
+            c.blksize=600
             # hole punch eh udp
             # deixar iperf determinar o tamanho do bloco
             #trocar esse valor depois pelo que der no tcp
@@ -140,7 +140,7 @@ class PoC:
 
                 sleep(2)
                 cmd = "socat -d -d -b 65500 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
-                cmd2 = "socat -d -d -b 65500 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                cmd2 ="socat -d -d -b 65500 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                 print(cmd)
                 print(cmd2)
@@ -203,7 +203,7 @@ class PoC:
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #make sure client doesnt get above messages
-                sleep(6)
+                sleep(4)
 
             socket_tcp.close()
             socket_udp.close()
@@ -218,6 +218,9 @@ class PoC:
                 cmd2 = "socat -d -d -b 65500 udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
                 print(cmd)
                 print(cmd2)
+
+                print(str(open_hole(self.udp_local_port)))
+                print(str(open_hole(self.tcp_local_port)))
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelUDP_TCP = Popen(cmd.split())
                 tunnelUDP_TCP2 = Popen(cmd2.split())
@@ -413,10 +416,10 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("normal")
+                self.make_tcp_test("reverso")
                 #self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-                self.make_tcp_test("reverso")
+                self.make_tcp_test("normal")
                 #self.make_udp_test("reverso")
             sleep(5)
 
