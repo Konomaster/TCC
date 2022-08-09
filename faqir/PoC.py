@@ -116,7 +116,6 @@ class PoC:
             # hole punch eh udp
             # deixar iperf determinar o tamanho do bloco
             #trocar esse valor depois pelo que der no tcp
-            c.bandwidth=400000
 
             # esperar por tantos segundos o servidor falar que ja ta pronto
             # comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
