@@ -203,7 +203,7 @@ class PoC:
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #make sure client doesnt get above messages
-                sleep(4)
+                sleep(3)
 
             socket_tcp.close()
             socket_udp.close()
