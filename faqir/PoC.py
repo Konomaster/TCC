@@ -138,13 +138,13 @@ class PoC:
                     return
 
                 sleep(2)
-                cmd = "socat -d -d -b 65500 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
-                cmd2 ="socat -d -d -b 65500 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                cmd = "socat -d -d -b 65536 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
+                cmd2 ="socat -d -d -b 65536 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                 print(cmd)
                 print(cmd2)
 
-                tunnelTCP_UDP2 = Popen(cmd2.split())
+                #tunnelTCP_UDP2 = Popen(cmd2.split())
                 tunnelTCP_UDP = Popen(cmd.split())
 
                 result = ""
@@ -154,6 +154,7 @@ class PoC:
 
                     result = c.run()
                     #Popen("iperf3 -c localhost -p 5000 -l 800".split())
+                    Popen("iperf -c localhost -p 5000".split()).wait()
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
@@ -167,7 +168,7 @@ class PoC:
                         testSucessfull = True
 
                 #fecha os tuneis
-                self.close_processes([tunnelTCP_UDP.pid,tunnelTCP_UDP2.pid])
+                self.close_processes([tunnelTCP_UDP.pid])
 
                 self.server_udp_hole = 0
                 self.server_udp_hole = 0
@@ -213,8 +214,8 @@ class PoC:
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
 
-                cmd = "socat -d -d -b 65500 udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:7000"
-                cmd2 = "socat -d -d -b 65500 udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
+                cmd = "socat -d -d -b 65536 udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:7000"
+                cmd2 = "socat -d -d -b 65536 udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
                 print(cmd)
                 print(cmd2)
 
@@ -225,7 +226,8 @@ class PoC:
                 tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
-                cmdserver="iperf3 -1 -s -p 7000"
+                #cmdserver="iperf3 -1 -s -p 7000"
+                cmdserver = "iperf -s -p 7000"
                 s=Popen(cmdserver.split())
 
                 try:

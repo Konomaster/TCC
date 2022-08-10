@@ -46,7 +46,7 @@ class KeepHoleAlive(Thread):
 
     def keep_alive(self):
         while not self.stopped():
-            self.socket.sendto("graduation project. contact: thomasovaletec@gmail.com".encode('utf-8'), ("1.1.1.1", 20000))
+            self.socket.sendto("graduation project. contact: thomasdovaletec@gmail.com".encode('utf-8'), ("1.1.1.1", 20000))
             sleep(self.secs)
 
     def run(self) -> None:
