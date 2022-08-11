@@ -145,16 +145,18 @@ class PoC:
                 print(cmd2)
 
                 #tunnelTCP_UDP2 = Popen(cmd2.split())
-                tunnelTCP_UDP = Popen(cmd.split())
+                #tunnelTCP_UDP = Popen(cmd.split())
 
                 result = ""
                 try:
 
                     print("cliente iniciando teste")
 
-                    result = c.run()
-                    #Popen("iperf3 -c localhost -p 5000 -l 800".split())
-                    Popen("iperf -c localhost -p 5000".split()).wait()
+                    #result = c.run()
+                    testeVazao=Popen("pv /dev/random | nc -u -p "+str(self.udp_local_port)+" "+ipPeer+" "+str(self.server_udp_hole)+" < /dev/stdin",shell=True)
+                    sleep(10)
+                    self.close_processes([testeVazao.pid])
+                    #Popen("iperf -c localhost -p 5000".split()).wait()
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
@@ -167,8 +169,6 @@ class PoC:
                         self.testDone = True
                         testSucessfull = True
 
-                #fecha os tuneis
-                self.close_processes([tunnelTCP_UDP.pid])
 
                 self.server_udp_hole = 0
                 self.server_udp_hole = 0
@@ -222,12 +222,12 @@ class PoC:
                 print(str(open_hole(self.udp_local_port)))
                 print(str(open_hole(self.tcp_local_port)))
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
-                tunnelUDP_TCP = Popen(cmd.split())
-                tunnelUDP_TCP2 = Popen(cmd2.split())
+                #tunnelUDP_TCP = Popen(cmd.split())
+                #tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
                 #cmdserver="iperf3 -1 -s -p 7000"
-                cmdserver = "iperf -s -p 7000"
+                cmdserver = "nc -u -l "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
 
                 try:
@@ -239,7 +239,6 @@ class PoC:
                 testSucessfull = True
                 # fecha o tunel
                 self.serverRunning=False
-                self.close_processes([tunnelUDP_TCP.pid,tunnelUDP_TCP2.pid])
 
                 print("teste concluido com sucesso")
             else:
