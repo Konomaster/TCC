@@ -153,7 +153,10 @@ class PoC:
                     print("cliente iniciando teste")
 
                     #result = c.run()
-                    testeVazao=Popen("pv /dev/random | nc -u -p "+str(self.udp_local_port)+" "+ipPeer+" "+str(self.server_udp_hole)+" < /dev/stdin",shell=True)
+                    #testeVazao=Popen("pv /dev/random | nc -u -p "+str(self.udp_local_port)+" "+ipPeer+" "+str(self.server_udp_hole)+" < /dev/stdin",shell=True)
+                    testeVazao = Popen(
+                        "echo 'cliente' | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(
+                            self.server_udp_hole) + " < /dev/stdin", shell=True)
                     sleep(10)
                     self.close_processes([testeVazao.pid])
                     #Popen("iperf -c localhost -p 5000".split()).wait()
@@ -226,9 +229,10 @@ class PoC:
                 #tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
-                #cmdserver="iperf3 -1 -s -p 7000"
-                cmdserver = "nc -u -l "+str(self.udp_local_port)
-                s=Popen(cmdserver.split())
+                #cmdserver = "nc -u -l "+str(self.udp_local_port)
+                cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
+                s = Popen(cmdserver,shell=True)
+                #s=Popen(cmdserver.split())
 
                 try:
                     s.wait(25)
@@ -416,10 +420,10 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("reverso")
+                self.make_tcp_test("normal")
                 #self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-                self.make_tcp_test("normal")
+                self.make_tcp_test("reverso")
                 #self.make_udp_test("reverso")
             sleep(5)
 
