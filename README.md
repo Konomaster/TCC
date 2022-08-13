@@ -4,67 +4,67 @@
 
 ## Para rodar a prova de conceito:
 
-sudo apt update
+	sudo apt update
 
-sudo apt install nodejs 
+	sudo apt install nodejs 
 
-sudo apt install pv 
+	sudo apt install pv 
 
-pip3 install iperf3 
+	pip3 install iperf3 
 
-pip3 install psutil  
+	pip3 install psutil  
 
 ### Instalando o iperf3
 
-git clone https://github.com/esnet/iperf.git iperf3
+	git clone https://github.com/esnet/iperf.git iperf3
 
-cd iperf3
+	cd iperf3
 
-./configure
+	./configure
 
-make
+	make
 
-sudo make install
+	sudo make install
 
-sudo ldconfig
+	sudo ldconfig
 
-cd ..
+	cd ..
 
-###Instalando a Prova de Conceito (não dê clone dentro da pasta em que o iperf3 foi clonado):
+### Instalando a Prova de Conceito (não dê clone dentro da pasta em que o iperf3 foi clonado):
 
-git clone https://github.com/Konomaster/TCC.git
+	git clone https://github.com/Konomaster/TCC.git
 
-cd TCC 
+	cd TCC 
 
-git clone https://github.com/jselbie/stunserver.git
+	git clone https://github.com/jselbie/stunserver.git
 
-cd stunserver
+	cd stunserver
 
-sudo apt-get install g++
+	sudo apt-get install g++
 
-sudo apt-get install make
+	sudo apt-get install make
 
-sudo apt-get install libboost-dev
+	sudo apt-get install libboost-dev
 
-sudo apt-get install libssl-dev
+	sudo apt-get install libssl-dev
 
-make
+	make
 
-cd ../
+	cd ../
 
-npm install @josaiasmoura/peer-network --save
+	npm install @josaiasmoura/peer-network --save
 
-rm -r node_modules/@josaiasmoura
+	rm -r node_modules/@josaiasmoura
 
-cp -r @josaiasmoura node_modules
+	cp -r @josaiasmoura node_modules
 
-cd faqir/
+	cd faqir/
 
 ### Rodando a prova de conceito
 
-git checkout 1c41027aecd279549fe9bf480a44b6ae154ffb0e
+	git checkout 1c41027aecd279549fe9bf480a44b6ae154ffb0e
 
-python3 PoC.py
+	python3 PoC.py
 
 
 
