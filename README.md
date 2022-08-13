@@ -30,7 +30,7 @@
 
 	cd ..
 
-### Instalando a Prova de Conceito (não dê clone dentro da pasta em que o iperf3 foi clonado):
+### Instalando a Prova de Conceito:
 
 	git clone https://github.com/Konomaster/TCC.git
 
@@ -67,34 +67,3 @@
 	python3 PoC.py
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-#ignorem isso
-
-Faça clone do repositorio
-
-dentro da pasta do repositorio:
-	npm init (pressione enter para aceitas as configurações padrao)
-	
-	npm install @josaiasmoura/peer-network --save          
-	
-Agora dentro da pasta "node_modules" criada dentro da pasta do repositorio:
-	delete a pasta "@josaiasmoura"
-	
-	copie a pasta "@josaiasmora" dentro da pasta raiz do repositório e cole dentro de "node_modules"
-	(ela vai substituir a pasta "@josaiasmoura" deletada anteriormente)
-	
-Agora para rodar a prova de conceito:
-	python3 PoC.py
-	
-sudo ldconfig depois de instalar iperf3 do github
