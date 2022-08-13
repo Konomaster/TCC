@@ -21,7 +21,7 @@ const KEEP_ALIVE_TIME = 4000;
 const LOOKUP_TIME = 20000;
 //const PEER_OFFLINE_TIME = 20000 * 6; // 2min
 const PEER_OFFLINE_TIME = 20000 * 3; // 1min
-const ANNOUNCE_TIME = 20000 * 6; 
+const ANNOUNCE_TIME = 20000 * 3; // 1min 
 //const ANNOUNCE_TIME = 20000 * 12; // 4min
 
 class NetworkDht extends NetworkBase {

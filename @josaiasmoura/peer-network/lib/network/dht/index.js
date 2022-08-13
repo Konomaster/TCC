@@ -48,6 +48,10 @@ class DhtProtocol extends EventEmitter {
             throw err;
         }
 
+        //(Custom)
+        this.announcedPorts=[]
+        //(End Custom)
+
         this.id = opts.id || crypto.randomBytes(20);
         this.concurrency = opts.concurrency || 16;
 
@@ -217,6 +221,7 @@ class DhtProtocol extends EventEmitter {
                     this.remoteAddress.port,
                     (err, n) => {
                         console.log("porta announce: ",this.remoteAddress.port);
+                        this.announcedPorts.push(this.remoteAddress.port)
                         this.emit('announce-done', err, n);
                     }
                 );
@@ -403,6 +408,13 @@ function _updateRemoteIp(self, remoteIps) {
         }
 
         let remoteIpCandidate = ips[0];
+        
+        //(Custom)
+        //force to get the port on the end of the list
+        //which might be the correct public port
+        if (self.announcedPorts.includes(remoteIpCandidate)){
+            remoteIpCandidate=ips[ips.length -1]
+        }
 
         if (remoteIpCandidate.count === 1 && qtdResponses > 1) {
             self._symmetricNAT = true;
