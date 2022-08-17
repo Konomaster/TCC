@@ -201,7 +201,7 @@ class PoC:
             keep_udp.join()
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
-                print("furando buracos para peer ip: "+ipPeer+" porto "+self.client_udp_hole)
+                print("furando buracos para peer ip: "+ipPeer+" porto "+str(self.client_udp_hole))
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #make sure client doesnt get above messages
