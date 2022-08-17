@@ -153,10 +153,8 @@ class PoC:
                     print("cliente iniciando teste")
 
                     #result = c.run()
-                    #testeVazao=Popen("pv /dev/random | nc -u -p "+str(self.udp_local_port)+" "+ipPeer+" "+str(self.server_udp_hole)+" < /dev/stdin",shell=True)
-                    testeVazao = Popen(
-                        "echo 'cliente' | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(
-                            self.server_udp_hole) + " < /dev/stdin", shell=True)
+                    testeVazao=Popen("pv -B 1500 /dev/random | nc -u -p "+str(self.udp_local_port)+" "+ipPeer+" "+str(self.server_udp_hole)+" < /dev/stdin",shell=True)
+                    #testeVazao = Popen("echo 'cliente' | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(self.server_udp_hole) + " < /dev/stdin", shell=True)
                     sleep(10)
                     self.close_processes([testeVazao.pid])
                     #Popen("iperf -c localhost -p 5000".split()).wait()
@@ -229,8 +227,8 @@ class PoC:
                 #tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
-                #cmdserver = "nc -u -l "+str(self.udp_local_port)
-                cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
+                cmdserver = "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
+                #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
                 s = Popen(cmdserver,shell=True)
                 #s=Popen(cmdserver.split())
 
