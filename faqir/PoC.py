@@ -151,9 +151,10 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-
-                    #result = c.run()
-                    testeVazao=Popen("pv -B 1500 /dev/random | nc -u -p "+str(self.udp_local_port)+" "+ipPeer+" "+str(self.server_udp_hole)+" < /dev/stdin",shell=True)
+                    cstring="pv -B 1500 /dev/random | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(
+                        self.server_udp_hole) + " < /dev/stdin"
+                    print(cstring)
+                    testeVazao=Popen(cstring,shell=True)
                     #testeVazao = Popen("echo 'cliente' | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(self.server_udp_hole) + " < /dev/stdin", shell=True)
                     sleep(10)
                     self.close_processes([testeVazao.pid])
@@ -200,7 +201,7 @@ class PoC:
             keep_udp.join()
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
-                print("furando buracos para peer ip: "+ipPeer)
+                print("furando buracos para peer ip: "+ipPeer+" porto "+self.client_udp_hole)
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #make sure client doesnt get above messages
@@ -418,10 +419,10 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("normal")
+                self.make_tcp_test("reverso")
                 #self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-                self.make_tcp_test("reverso")
+                self.make_tcp_test("normal")
                 #self.make_udp_test("reverso")
             sleep(5)
 
