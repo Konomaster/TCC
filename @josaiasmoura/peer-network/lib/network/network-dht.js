@@ -49,7 +49,6 @@ class NetworkDht extends NetworkBase {
             _controlMessage(this,msg)
         })
 
-        this.__publicIPandPort='' 
         
         this.__notifyQueue=new CallbackQueue(1e6)
 
@@ -80,7 +79,7 @@ class NetworkDht extends NetworkBase {
 
         this.__socket.on('message', (msg, from) => {
             this.stats.bytesReceived += (from.size + 8 + 20);
-            if (from.address.toString()==="45.5.168.220"){
+            if (from.address.toString()==="177.70.93.208"){
             console.log("chegando msg de: "+from.address.toString()+" porta: "+from.port.toString());
             }
             _onUdpMessage(this, msg, from);
@@ -134,7 +133,6 @@ class NetworkDht extends NetworkBase {
 
                     this.__peers.addCandidate(dht.remoteAddress, selfCandidate);
                     this.__peers.online(selfCandidate);
-                    _sendMyCandidates(this,myself)
                 }
 
                 if (!this.stats.startTime) {
@@ -455,7 +453,7 @@ function _keepAlive(self) {
         if (peer.isMe) return;
         //flagged peers wont be pinged
 
-        else if (peer.candidates[0].address === self.__publicIPandPort.address || self.__notPing.includes(peer.id)){
+        else if (peer.candidates[0].address === self.__dht.remoteAddress.address || self.__notPing.includes(peer.id)){
         	//console.log("Peer que nao vai ser pingado "+peer.id+" "+peer.address+" "+peer.port)
 	        return;
         }
@@ -509,7 +507,7 @@ _lookup.stop = function(self) {
  */
 
 function _notifyNewPeer(self,peer){
-    if (peer.isMe || self.__publicIPandPort===''){
+    if (peer.isMe || self.__dht.remoteAddress.address===null){
     console.log("nao me envio para o python nem com hairpin");
     return;
     }
@@ -527,12 +525,12 @@ function _notifyNewPeer(self,peer){
         }
     })
     
-    if(!self.__boundSent && self.__publicIPandPort!=''){
+    if(!self.__boundSent && self.__dht.remoteAddress.address!=null && self.__dht.remoteAddress.port != 0){
     	let socketData=self.__socket.address()
     	let holeport=socketData.port
     	let holeaddress=socketData.address
     	
-    	let holeString="holeport,"+holeport+","+holeaddress+","+Number(self.__publicIPandPort.port)+","+self.__publicIPandPort.address
+    	let holeString="holeport,"+holeport+","+holeaddress+","+Number(self.__dht.remoteAddress.port)+","+self.__dht.remoteAddress.address
     	
         _responseMessage(self,holeString)
 
@@ -635,12 +633,6 @@ function _responseMessage(self,message){
 		self.__controlSocket.close()
 		}
 	})
-
-}
-
-function _sendMyCandidates(self,meAsaPeer){
-    self.__publicIPandPort=meAsaPeer.candidates[0]
-	let jsonMe=JSON.stringify(meAsaPeer)
 
 }
 

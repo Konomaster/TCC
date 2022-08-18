@@ -144,7 +144,7 @@ class PoC:
                 try:
 
                     print("cliente iniciando teste")
-                    cstring="pv -B 1450 /dev/random | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(
+                    cstring="pv -B 1425 /dev/random | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(
                         self.server_udp_hole) + " < /dev/stdin"
                     print(cstring)
                     testeVazao=Popen(cstring,shell=True)
@@ -225,7 +225,7 @@ class PoC:
                 try:
                     s.wait(25)
                 except TimeoutExpired:
-                    print("matando servidor: "+str(s.pid)) 
+                    print("matando servidor: "+str(s.pid))
                     self.close_processes([s.pid])
                 self.testDone = True
                 testSucessfull = True
@@ -272,7 +272,7 @@ class PoC:
             # hole punch eh udp
             c.protocol = 'udp'
             # deixar iperf determinar o tamanho do bloco
-            c.blksize = 1450
+            c.blksize = 1425
             #trocar esse valor depois pelo que der no tcp
             c.bandwidth=1000000
 
@@ -408,11 +408,17 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("reverso")
-                #self.make_udp_test("normal")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 self.make_tcp_test("normal")
-                #self.make_udp_test("reverso")
+                print("indo pro teste tcp reverso")
+                sleep(5)
+                self.make_tcp_test("reverso")
+                print("indo pro teste udp normal")
+                sleep(5)
+                self.make_udp_test("normal")
+            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+                print("indo pro teste udp reverso")
+                self.make_udp_test("reverso")
+                print("acabou todos os testes")
             sleep(5)
 
 
