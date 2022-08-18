@@ -221,8 +221,6 @@ class PoC:
                 print(cmd)
                 print(cmd2)
 
-                print(str(open_hole(self.udp_local_port)))
-                print(str(open_hole(self.tcp_local_port)))
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 #tunnelUDP_TCP = Popen(cmd.split())
                 #tunnelUDP_TCP2 = Popen(cmd2.split())
