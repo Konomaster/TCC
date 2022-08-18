@@ -229,9 +229,7 @@ class PoC:
                 serverRunning=True
                 print("Servidor iniciando")
                 cmdserver = "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
-                #cmdserver = "echo 'servidor' | nc -u -l " + str(self.udp_local_port)
                 s = Popen(cmdserver,shell=True)
-                #s=Popen(cmdserver.split())
 
                 try:
                     s.wait(25)
@@ -516,6 +514,8 @@ class PoC:
 
     def close_processes(self,pid_list):
         for pid in pid_list:
+            if not psutil.pid_exists(pid):
+                continue
             parent=psutil.Process(pid)
             for child in parent.children(recursive=True):
                 child.kill()
