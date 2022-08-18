@@ -225,7 +225,7 @@ class PoC:
                 try:
                     s.wait(25)
                 except TimeoutExpired:
-                    print("matando servidor: "+str(s.pid))
+                    print("matando servidor: "+str(s.pid)) 
                     self.close_processes([s.pid])
                 self.testDone = True
                 testSucessfull = True
