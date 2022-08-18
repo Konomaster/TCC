@@ -109,13 +109,6 @@ class PoC:
             gonnaString = "gonnaTest," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
             self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
-            c = iperf3.Client()
-            c.server_hostname = "localhost"
-            c.port = self.iperf_port
-            c.blksize=400
-            # hole punch eh udp
-            # deixar iperf determinar o tamanho do bloco
-            #trocar esse valor depois pelo que der no tcp
 
             # esperar por tantos segundos o servidor falar que ja ta pronto
             # comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
@@ -232,7 +225,7 @@ class PoC:
                 try:
                     s.wait(25)
                 except TimeoutExpired:
-                    print("matando servidor")
+                    print("matando servidor: "+s.pid)
                     self.close_processes([s.pid])
                 self.testDone = True
                 testSucessfull = True
@@ -516,8 +509,14 @@ class PoC:
                 continue
             parent=psutil.Process(pid)
             for child in parent.children(recursive=True):
-                child.kill()
-            parent.kill()
+                try:
+                    child.kill()
+                except:
+                    pass
+            try:
+                parent.kill()
+            except:
+                pass
 
 
 def peerNetwork():
