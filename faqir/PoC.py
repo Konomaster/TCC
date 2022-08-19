@@ -131,27 +131,16 @@ class PoC:
                     return
 
                 sleep(2)
-                cmd = "socat -d -d -b 65536 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
-                cmd2 ="socat -d -d -b 65536 tcp-listen:"+str(self.iperf_port)+",reuseaddr,reuseport udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
-
-                print(cmd)
-                print(cmd2)
-
-                #tunnelTCP_UDP2 = Popen(cmd2.split())
-                #tunnelTCP_UDP = Popen(cmd.split())
 
                 result = ""
                 try:
 
                     print("cliente iniciando teste")
-                    cstring="pv -B 1400 /dev/random | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(
-                        self.server_udp_hole) + " < /dev/stdin"
+                    cstring="pv -B 1450 /dev/random | socat -b 1450 - udp:"+ipPeer+":"+str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
                     print(cstring)
                     testeVazao=Popen(cstring,shell=True)
-                    #testeVazao = Popen("echo 'cliente' | nc -u -p " + str(self.udp_local_port) + " " + ipPeer + " " + str(self.server_udp_hole) + " < /dev/stdin", shell=True)
                     sleep(10)
                     self.close_processes([testeVazao.pid])
-                    #Popen("iperf -c localhost -p 5000".split()).wait()
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
@@ -209,14 +198,7 @@ class PoC:
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
 
-                cmd = "socat -d -d -b 65536 udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:7000"
-                cmd2 = "socat -d -d -b 65536 udp-listen:"+str(self.udp_local_port)+",reuseaddr tcp:localhost:7000"
-                print(cmd)
-                print(cmd2)
-
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
-                #tunnelUDP_TCP = Popen(cmd.split())
-                #tunnelUDP_TCP2 = Popen(cmd2.split())
                 serverRunning=True
                 print("Servidor iniciando")
                 cmdserver = "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
