@@ -1,12 +1,11 @@
-
-
-
+import math
 import os.path
 
 import socket
+import subprocess
 import threading
 from time import sleep
-from subprocess import Popen, PIPE, TimeoutExpired
+from subprocess import Popen, PIPE, TimeoutExpired, DEVNULL
 import iperf3
 import psutil
 from stun import open_hole, KeepHoleAlive
@@ -41,6 +40,18 @@ class PoC:
         self.iperf_port=5000
         self.udp_local_port=2000
         self.tcp_local_port=2001
+        self.bits_per_sec_sender=0
+        self.measures={
+            "B":0,
+            "KiB":1,
+            "MiB":2,
+            "GiB":3,
+            "TiB":4,
+            "PiB":5,
+            "EiB":6,
+            "ZiB":7,
+            "YiB":8
+        }
 
     def seleciona_par(self,direcao):
         tempLP=self.listaPares
@@ -86,6 +97,39 @@ class PoC:
 
         return ipPeer, idPeer, clientOrServer
 
+    def extract_troughput(self,pvstderr):
+        l = pvstderr.decode('utf-8').split("\r")[-2].lstrip("[").rstrip("]")
+        i = -3
+        measure = ""
+        while not l[i].isdigit():
+            measure += l[i]
+            i -= 1
+        measure = measure[::-1]
+        average = ""
+        while i >= -len(l):
+            average += l[i]
+            i -= 1
+        average = average[::-1].replace(",", ".")
+        # google search (what does mib stands for)
+        if measure == "B":
+            self.bits_per_sec = float(average) * 8.0
+        elif measure == "KiB":
+            self.bits_per_sec = float(average) * 8.0 * 1024.0
+        elif measure == "MiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 2.0)
+        elif measure == "GiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 3.0)
+        elif measure == "TiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 4.0)
+        elif measure == "PiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 5.0)
+        elif measure == "EiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 6.0)
+        elif measure == "ZiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 7.0)
+        elif measure == "YiB":
+            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 8.0)
+
     def make_tcp_test(self,direcao):
 
         ipPeer, idPeer, clientOrServer = self.seleciona_par(direcao)
@@ -95,8 +139,8 @@ class PoC:
 
         if clientOrServer == 1:
 
-            udp_hole, socket_udp, keep_udp=self.open_udp_hole()
-            tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
+            udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+            tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
 
             if udp_hole == -1 or tcp_hole == -1:
                 print("erro ao dar bind nos sockets do cliente")
@@ -134,13 +178,17 @@ class PoC:
 
                 result = ""
                 try:
-
                     print("cliente iniciando teste")
-                    cstring="pv -B 1450 /dev/random | socat -b 1450 - udp:"+ipPeer+":"+str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
-                    print(cstring)
-                    testeVazao=Popen(cstring,shell=True)
+                    str1="pv -f -B 1450 -a /dev/random"
+                    str2="socat -b 1450 - udp:"+ipPeer+":"+str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
+                    t1=Popen(str1.split(),stderr=PIPE,stdout=PIPE)
+                    t2=Popen(str2.split(),stdin=t1.stdout)
+                    t1.stdout.close()
                     sleep(10)
-                    self.close_processes([testeVazao.pid])
+                    self.close_processes([t1.pid,t2.pid])
+                    for line in t1.stderr:
+                        self.extract_troughput(line)
+                        break
                     self.testDone=True
                 except:
                     print('exception no teste (cliente)')
@@ -201,17 +249,56 @@ class PoC:
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 serverRunning=True
                 print("Servidor iniciando")
-                cmdserver = "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
-                s = Popen(cmdserver,shell=True)
+                str1="nc -u -l "+str(self.udp_local_port)
+                str2="pv -f -r"
+                #cmdserver = "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
+                t1 = Popen(str1.split(),stdout=PIPE)
+                t2 = Popen(str2.split(),stdin=t1.stdout,stderr=PIPE,stdout=DEVNULL)
+                t1.stdout.close()
 
-                try:
-                    s.wait(25)
-                except TimeoutExpired:
-                    print("matando servidor: "+str(s.pid))
-                    self.close_processes([s.pid])
+                sleep(25)
+                print("matando servidor: "+str(t1.pid))
+                self.close_processes([t1.pid,t2.pid])
+                max_bits=0
+                for line in t2.stderr:
+                    l=line.decode('utf-8').rstrip("\n").rstrip("\r").split("\r")
+                    for step in l:
+                        i = -3
+                        measure = ""
+                        while not step[i].isdigit():
+                            measure += step[i]
+                            i -= 1
+                        measure = measure[::-1]
+                        average = ""
+                        while i >= -len(step):
+                            average += step[i]
+                            i -= 1
+                        average = float(average[::-1].replace(",", "."))
+                        bits=0
+                        if measure == "B":
+                            bits = average * 8.0
+                        elif measure == "KiB":
+                            bits = average * 8.0 * 1024.0
+                        elif measure == "MiB":
+                            bits = average * 8.0 * math.pow(1024.0, 2.0)
+                        elif measure == "GiB":
+                            bits = average * 8.0 * math.pow(1024.0, 3.0)
+                        elif measure == "TiB":
+                            bits = average * 8.0 * math.pow(1024.0, 4.0)
+                        elif measure == "PiB":
+                            bits = average * 8.0 * math.pow(1024.0, 5.0)
+                        elif measure == "EiB":
+                            bits = average * 8.0 * math.pow(1024.0, 6.0)
+                        elif measure == "ZiB":
+                            bits = average * 8.0 * math.pow(1024.0, 7.0)
+                        elif measure == "YiB":
+                            bits = average * 8.0 * math.pow(1024.0, 8.0)
+                        if bits>max_bits:
+                            max_bits=bits
+                    print()
+                    break
                 self.testDone = True
                 testSucessfull = True
-                # fecha o tunel
                 self.serverRunning=False
 
                 print("teste concluido com sucesso")
@@ -254,9 +341,12 @@ class PoC:
             # hole punch eh udp
             c.protocol = 'udp'
             # deixar iperf determinar o tamanho do bloco
-            c.blksize = 1425
+            c.blksize = 1450
             #trocar esse valor depois pelo que der no tcp
-            c.bandwidth=1000000
+            if self.bits_per_sec_sender>0:
+                c.bandwidth=self.bits_per_sec_sender
+            else:
+                c.bandwidth=1000000
 
             # esperar por tantos segundos o servidor falar que ja ta pronto
             # comunicacao vai ser feita pelos sockets da biblioteca antes de fecha-los
@@ -392,10 +482,8 @@ class PoC:
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
                 self.make_tcp_test("normal")
                 print("indo pro teste tcp reverso")
-                sleep(3)
                 self.make_tcp_test("reverso")
                 print("indo pro teste udp normal")
-                sleep(3)
                 self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 print("indo pro teste udp reverso")

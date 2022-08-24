@@ -9,6 +9,8 @@
 	sudo apt install nodejs 
 
 	sudo apt install pv 
+	
+	sudo apt install socat
 
 	pip3 install iperf3 
 
@@ -66,4 +68,9 @@
 
 	python3 PoC.py
 
+### Obs: talvez seja necessario colocar manualmente o caminho do libiperf.so.0
 
+	sudo find /home -name 'libiperf*'
+	
+	no teste udp (aprox linha 270) trocar o c = iperf3.Client() por c = iperf3.Client(lib_name="<caminho da biblioteca>")
+	
