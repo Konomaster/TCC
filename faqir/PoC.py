@@ -41,17 +41,6 @@ class PoC:
         self.udp_local_port=2000
         self.tcp_local_port=2001
         self.bits_per_sec_sender=0
-        self.measures={
-            "B":0,
-            "KiB":1,
-            "MiB":2,
-            "GiB":3,
-            "TiB":4,
-            "PiB":5,
-            "EiB":6,
-            "ZiB":7,
-            "YiB":8
-        }
 
     def seleciona_par(self,direcao):
         tempLP=self.listaPares
@@ -97,38 +86,40 @@ class PoC:
 
         return ipPeer, idPeer, clientOrServer
 
-    def extract_troughput(self,pvstderr):
-        l = pvstderr.decode('utf-8').split("\r")[-2].lstrip("[").rstrip("]")
+    def extract_throughput(self, pvstderr_decoded):
+        l = pvstderr_decoded
         i = -3
         measure = ""
         while not l[i].isdigit():
             measure += l[i]
             i -= 1
-        measure = measure[::-1]
+        measure = measure[::-1].strip()
         average = ""
         while i >= -len(l):
             average += l[i]
             i -= 1
-        average = average[::-1].replace(",", ".")
+        average = float(average[::-1].replace(",", "."))
         # google search (what does mib stands for)
+        bits = 0
         if measure == "B":
-            self.bits_per_sec = float(average) * 8.0
+            bits = average * 8.0
         elif measure == "KiB":
-            self.bits_per_sec = float(average) * 8.0 * 1024.0
+            bits = average * 8.0 * 1024.0
         elif measure == "MiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 2.0)
+            bits = average * 8.0 * math.pow(1024.0, 2.0)
         elif measure == "GiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 3.0)
+            bits = average * 8.0 * math.pow(1024.0, 3.0)
         elif measure == "TiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 4.0)
+            bits = average * 8.0 * math.pow(1024.0, 4.0)
         elif measure == "PiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 5.0)
+            bits = average * 8.0 * math.pow(1024.0, 5.0)
         elif measure == "EiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 6.0)
+            bits = average * 8.0 * math.pow(1024.0, 6.0)
         elif measure == "ZiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 7.0)
+            bits = average * 8.0 * math.pow(1024.0, 7.0)
         elif measure == "YiB":
-            self.bits_per_sec = float(average) * 8.0 * math.pow(1024.0, 8.0)
+            bits = average * 8.0 * math.pow(1024.0, 8.0)
+        return bits
 
     def make_tcp_test(self,direcao):
 
@@ -187,7 +178,8 @@ class PoC:
                     sleep(10)
                     self.close_processes([t1.pid,t2.pid])
                     for line in t1.stderr:
-                        self.extract_troughput(line)
+                        step=line.decode('utf-8').split("\r")[-2].lstrip("[").rstrip("]")
+                        self.bits_per_sec_sender=self.extract_throughput(step)
                         break
                     self.testDone=True
                 except:
@@ -263,39 +255,9 @@ class PoC:
                 for line in t2.stderr:
                     l=line.decode('utf-8').rstrip("\n").rstrip("\r").split("\r")
                     for step in l:
-                        i = -3
-                        measure = ""
-                        while not step[i].isdigit():
-                            measure += step[i]
-                            i -= 1
-                        measure = measure[::-1]
-                        average = ""
-                        while i >= -len(step):
-                            average += step[i]
-                            i -= 1
-                        average = float(average[::-1].replace(",", "."))
-                        bits=0
-                        if measure == "B":
-                            bits = average * 8.0
-                        elif measure == "KiB":
-                            bits = average * 8.0 * 1024.0
-                        elif measure == "MiB":
-                            bits = average * 8.0 * math.pow(1024.0, 2.0)
-                        elif measure == "GiB":
-                            bits = average * 8.0 * math.pow(1024.0, 3.0)
-                        elif measure == "TiB":
-                            bits = average * 8.0 * math.pow(1024.0, 4.0)
-                        elif measure == "PiB":
-                            bits = average * 8.0 * math.pow(1024.0, 5.0)
-                        elif measure == "EiB":
-                            bits = average * 8.0 * math.pow(1024.0, 6.0)
-                        elif measure == "ZiB":
-                            bits = average * 8.0 * math.pow(1024.0, 7.0)
-                        elif measure == "YiB":
-                            bits = average * 8.0 * math.pow(1024.0, 8.0)
+                        bits=self.extract_throughput(step.rstrip("]").lstrip("["))
                         if bits>max_bits:
                             max_bits=bits
-                    print()
                     break
                 self.testDone = True
                 testSucessfull = True
@@ -344,7 +306,7 @@ class PoC:
             c.blksize = 1450
             #trocar esse valor depois pelo que der no tcp
             if self.bits_per_sec_sender>0:
-                c.bandwidth=self.bits_per_sec_sender
+                c.bandwidth=int(self.bits_per_sec_sender)
             else:
                 c.bandwidth=1000000
 
@@ -433,7 +395,7 @@ class PoC:
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #delay to make sure what i just sent dont get received by the client
-                sleep(6)
+                sleep(3)
 
             socket_tcp.close()
             socket_udp.close()
@@ -480,10 +442,10 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("normal")
-                print("indo pro teste tcp reverso")
-                self.make_tcp_test("reverso")
-                print("indo pro teste udp normal")
+                #self.make_tcp_test("normal")
+                #print("indo pro teste tcp reverso")
+                #self.make_tcp_test("reverso")
+                #print("indo pro teste udp normal")
                 self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 print("indo pro teste udp reverso")
