@@ -444,11 +444,14 @@ class PoC:
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
                 self.make_tcp_test("normal")
                 print("indo pro teste tcp reverso")
+                sleep(3)
                 self.make_tcp_test("reverso")
                 print("indo pro teste udp normal")
+                sleep(3)
                 self.make_udp_test("normal")
             elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 print("indo pro teste udp reverso")
+                sleep(3)
                 self.make_udp_test("reverso")
                 print("acabou todos os testes")
             sleep(5)
