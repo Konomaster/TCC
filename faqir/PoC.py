@@ -339,8 +339,6 @@ class PoC:
 
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
-
-                sleep(2)
                 result = ""
                 try:
 
@@ -442,9 +440,9 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("normal")
-                print("indo pro teste tcp reverso")
-                self.make_tcp_test("reverso")
+                #self.make_tcp_test("normal")
+                #print("indo pro teste tcp reverso")
+                #self.make_tcp_test("reverso")
                 print("indo pro teste udp normal")
                 self.make_udp_test("normal")
                 print("indo pro teste udp reverso")
@@ -514,7 +512,7 @@ class PoC:
                 print("erro ao dar bind no socket udp do cliente")
                 return -1, -1, -1
 
-            keep_udp = KeepHoleAlive(socket_udp, 4)
+            keep_udp = KeepHoleAlive(socket_udp, 2)
 
             keep_udp.start()
 
@@ -534,7 +532,7 @@ class PoC:
                 print("erro ao dar bind no socket tcp do cliente")
                 return -1, -1, -1
 
-            keep_tcp = KeepHoleAlive(socket_tcp, 4)
+            keep_tcp = KeepHoleAlive(socket_tcp, 2)
 
             keep_tcp.start()
 
