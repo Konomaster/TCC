@@ -160,7 +160,7 @@ class PoC:
             socket_udp.close()
 
             if self.serverReady:
-
+                self.serverReady=False
                 if self.server_udp_hole == 0 or self.server_udp_hole == 0:
                     print("nao foram recebidos buracos do servidor")
                     return
@@ -233,7 +233,7 @@ class PoC:
             socket_udp.close()
 
             if self.gonnaTest:
-
+                self.gonnaTest=False
                 serverString = "serverReady," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
@@ -325,7 +325,7 @@ class PoC:
             socket_udp.close()
 
             if self.serverReady:
-
+                self.serverReady=False
                 if self.server_udp_hole == 0 or self.server_udp_hole == 0:
                     print("nao foram recebidos buracos do servidor")
                     return
@@ -401,7 +401,7 @@ class PoC:
             socket_udp.close()
 
             if self.gonnaTest:
-
+                self.gonnaTest=False
                 serverString = "serverReady," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
                 print(serverString)
@@ -444,13 +444,10 @@ class PoC:
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
                 self.make_tcp_test("normal")
                 print("indo pro teste tcp reverso")
-                sleep(3)
                 self.make_tcp_test("reverso")
                 print("indo pro teste udp normal")
-                sleep(3)
                 self.make_udp_test("normal")
                 print("indo pro teste udp reverso")
-                sleep(3)
                 self.make_udp_test("reverso")
                 print("acabou todos os testes")
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
