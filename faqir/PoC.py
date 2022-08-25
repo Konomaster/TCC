@@ -449,11 +449,12 @@ class PoC:
                 print("indo pro teste udp normal")
                 sleep(3)
                 self.make_udp_test("normal")
-            elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
                 print("indo pro teste udp reverso")
                 sleep(3)
                 self.make_udp_test("reverso")
                 print("acabou todos os testes")
+            #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+
             sleep(5)
 
 
