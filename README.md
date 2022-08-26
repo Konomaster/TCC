@@ -1,6 +1,6 @@
-#TCC
+# TCC
 
-#Este tutorial supõe que você ja tenha o python3 e o pip3 instalado e que você este utilizando o ubuntu 20.04 LTS.
+# Este tutorial supõe que você ja tenha o python3 e o pip3 instalado e que você esteja utilizando o ubuntu 20.04 LTS.
 
 ## Para rodar a prova de conceito:
 
@@ -64,13 +64,11 @@
 
 ### Rodando a prova de conceito
 
-	git checkout 1c41027aecd279549fe9bf480a44b6ae154ffb0e
-
 	python3 PoC.py
 
 ### Obs: talvez seja necessario colocar manualmente o caminho do libiperf.so.0
 
 	sudo find /home -name 'libiperf*'
 	
-	no teste udp (aprox linha 270) trocar o c = iperf3.Client() por c = iperf3.Client(lib_name="<caminho da biblioteca>")
+	no teste udp (aprox linha 270 do arquivo PoC.py) trocar o c = iperf3.Client() por c = iperf3.Client(lib_name="<caminho da biblioteca>")
 	

@@ -41,6 +41,9 @@ class PoC:
         self.udp_local_port=2000
         self.tcp_local_port=2001
         self.bits_per_sec_sender=0
+        self.bits_per_sec_self=0
+        self.bits_per_sec_peer=0
+        self.endTest=False
 
     def seleciona_par(self,direcao):
         tempLP=self.listaPares
@@ -119,7 +122,7 @@ class PoC:
             bits = average * 8.0 * math.pow(1024.0, 7.0)
         elif measure == "YiB":
             bits = average * 8.0 * math.pow(1024.0, 8.0)
-        return bits
+        return int(bits)
 
     def make_tcp_test(self,direcao):
 
@@ -252,16 +255,25 @@ class PoC:
                 print("matando servidor: "+str(t1.pid))
                 self.close_processes([t1.pid,t2.pid])
                 max_bits=0
+                max="0,00 B/s"
                 for line in t2.stderr:
                     l=line.decode('utf-8').rstrip("\n").rstrip("\r").split("\r")
                     for step in l:
-                        bits=self.extract_throughput(step.rstrip("]").lstrip("["))
+                        clean_step=step.rstrip("]").lstrip("[")
+                        bits=self.extract_throughput(clean_step)
                         if bits>max_bits:
                             max_bits=bits
+                            max=clean_step
+                    self.bits_per_sec_peer=max_bits
                     break
                 self.testDone = True
                 testSucessfull = True
                 self.serverRunning=False
+
+                #envia resultado ao par
+                #necessario trocar o , do max porque a virgula eh meu separador especial
+                vazao="vazao,"+idPeer+","+max.replace(",",".")
+                self.s2.sendto(vazao.encode('utf-8'),("0.0.0.0",37711))
 
                 print("teste concluido com sucesso")
             else:
@@ -305,9 +317,11 @@ class PoC:
             # deixar iperf determinar o tamanho do bloco
             c.blksize = 1450
             #trocar esse valor depois pelo que der no tcp
-            if self.bits_per_sec_sender>0:
-                c.bandwidth=int(self.bits_per_sec_sender)
+            if self.bits_per_sec_peer>self.bits_per_sec_self:
+                c.bandwidth=self.bits_per_sec_self
             else:
+                c.bandwidth = self.bits_per_sec_peer
+            if c.bandwidth==0:
                 c.bandwidth=1000000
 
             # esperar por tantos segundos o servidor falar que ja ta pronto
@@ -496,6 +510,10 @@ class PoC:
                 self.gonnaTest=True
                 self.client_udp_hole=int(splitData[1])
                 self.client_tcp_hole=int(splitData[2])
+            elif splitData[0]=="vazao":
+                self.bits_per_sec_self=self.extract_throughput(splitData[1])
+            elif splitData[0]=="endTest":
+                self.endTest=True
 
             print('\rpeer: {}\n '.format(decodedData), end='')
 
