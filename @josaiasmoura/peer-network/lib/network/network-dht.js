@@ -543,7 +543,6 @@
   */
  
  function _sendHolePort(self){
-     console.log("sending port")
      if(self.__dht.remoteAddress.address!=null && self.__dht.remoteAddress.port != 0){
          let socketData=self.__socket.address()
          let holeport=socketData.port
