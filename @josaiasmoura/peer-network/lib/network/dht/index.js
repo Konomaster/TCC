@@ -173,7 +173,6 @@ class DhtProtocol extends EventEmitter {
                 }
             });
         };
-	console.log("local listen port: ",port);
         this.dht.listen(port, bind);
     }
 

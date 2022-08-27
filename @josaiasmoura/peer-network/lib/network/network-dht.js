@@ -235,10 +235,7 @@
      if (!peer) {
          return; // discard packet
      }
-     
-     //(Custom) remove after
-     console.log("ipp: "+from.address.toString()+" pport: "+from.port.toString()+"\n"+peer.id);
- 
+      
      // verify if msg is a valid packet
      let msgContent;
      try {
@@ -511,7 +508,7 @@
  
  function _notifyNewPeer(self,peer){
      if (peer.isMe || self.__dht.remoteAddress.address===null){
-     console.log("nao me envio para o python nem com hairpin");
+     //console.log("nao me envio para o python nem com hairpin");
      return;
      }
  
@@ -523,8 +520,6 @@
      socket.send(dadosBinario,37710,'0.0.0.0',function(error){
          if(error){
              socket.close()
-         }else{
-             console.log("add peer sent")
          }
      })
      
@@ -575,8 +570,6 @@
      socket.send(dadosBinario,37710,'0.0.0.0',function(error){
          if(error){
              socket.close()
-         }else{
-             console.log("data sent")
          }
  
      })
