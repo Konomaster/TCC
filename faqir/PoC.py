@@ -454,13 +454,13 @@ class PoC:
         while True:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
-                self.make_tcp_test("normal")
-                print("indo pro teste tcp reverso")
                 self.make_tcp_test("reverso")
+                print("indo pro teste tcp reverso")
+                self.make_tcp_test("normal")
                 print("indo pro teste udp normal")
-                self.make_udp_test("normal")
-                print("indo pro teste udp reverso")
                 self.make_udp_test("reverso")
+                print("indo pro teste udp reverso")
+                self.make_udp_test("normal")
                 print("acabou todos os testes")
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
 
@@ -575,7 +575,7 @@ class PoC:
 
 
 def peerNetwork():
-    process = Popen("node ../PeerNetwork.js", shell=True)
+    process = Popen("node ../PeerNetwork.js".split())
 
 
 def main():
