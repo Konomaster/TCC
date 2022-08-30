@@ -403,7 +403,7 @@ class PoC:
                     if result.error:
                         print("result error: " + result.error)
                     else:
-                        #print(self.save_results(c.bandwidth,result,0))
+                        self.save_results(c.bandwidth,result,0)
                         #print("teste concluido com sucesso")
                         self.testDone = True
                         testSucessfull = True
