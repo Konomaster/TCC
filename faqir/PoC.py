@@ -175,10 +175,10 @@ class PoC:
             tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
 
             if udp_hole == -1 or tcp_hole == -1:
-                print("erro ao dar bind nos sockets do cliente")
+                #print("erro ao dar bind nos sockets do cliente")
                 return
             elif udp_hole == -2 or tcp_hole == -2:
-                print("erro ao abrir buracos do cliente")
+                #print("erro ao abrir buracos do cliente")
                 return
 
             # manda msg de confirmacao
@@ -203,14 +203,14 @@ class PoC:
             if self.serverReady:
                 self.serverReady=False
                 if self.server_udp_hole == 0 or self.server_udp_hole == 0:
-                    print("nao foram recebidos buracos do servidor")
+                    #print("nao foram recebidos buracos do servidor")
                     return
 
                 sleep(2)
 
                 result = ""
                 try:
-                    print("cliente iniciando teste")
+                    #print("cliente iniciando teste")
                     str1="pv -f -B 1450 -a /dev/random"
                     str2="socat -b 1450 - udp:"+ipPeer+":"+str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
                     t1=Popen(str1.split(),stderr=PIPE,stdout=PIPE)
@@ -229,8 +229,8 @@ class PoC:
                     if result.error:
                         print("result error: " + result.error)
                     else:
-                        print(result)
-                        print("teste concluido com sucesso")
+                        #print(result)
+                        #print("teste concluido com sucesso")
                         self.testDone = True
                         testSucessfull = True
 
@@ -246,10 +246,10 @@ class PoC:
             tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
 
             if udp_hole == -1 or tcp_hole == -1:
-                print("erro ao dar bind nos sockets do servidor")
+                #print("erro ao dar bind nos sockets do servidor")
                 return
             elif tcp_hole == -2 or tcp_hole == -2:
-                print("erro ao abrir buracos do servidor")
+                #print("erro ao abrir buracos do servidor")
                 return
 
             for i in range(0, 40):
@@ -264,7 +264,7 @@ class PoC:
             keep_udp.join()
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
-                print("furando buracos para peer ip: "+ipPeer)
+                #print("furando buracos para peer ip: "+ipPeer)
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #make sure client doesnt get above messages
@@ -277,11 +277,11 @@ class PoC:
                 self.gonnaTest=False
                 serverString = "serverReady," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-                print(serverString)
+                #print(serverString)
 
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 serverRunning=True
-                print("Servidor iniciando")
+                #print("Servidor iniciando")
                 str1="nc -u -l "+str(self.udp_local_port)
                 str2="pv -f -r"
                 #cmdserver = "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
@@ -290,7 +290,7 @@ class PoC:
                 t1.stdout.close()
 
                 sleep(25)
-                print("matando servidor: "+str(t1.pid))
+                #print("matando servidor: "+str(t1.pid))
                 self.close_processes([t1.pid,t2.pid])
                 max_bits=0
                 max="0,00 B/s"
@@ -313,7 +313,7 @@ class PoC:
                 vazao="vazao,"+idPeer+","+max.replace(",",".")
                 self.s2.sendto(vazao.encode('utf-8'),("0.0.0.0",37711))
 
-                print("teste concluido com sucesso")
+                #print("teste concluido com sucesso")
             else:
                 print("gonnaTest nao chegou a tempo")
 
@@ -337,10 +337,10 @@ class PoC:
             tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
 
             if udp_hole == -1 or tcp_hole == -1:
-                print("erro ao dar bind nos sockets do cliente")
+                #print("erro ao dar bind nos sockets do cliente")
                 return
             elif udp_hole == -2 or tcp_hole == -2:
-                print("erro ao abrir buracos do cliente")
+                #print("erro ao abrir buracos do cliente")
                 return
 
             # manda msg de confirmacao
@@ -379,22 +379,22 @@ class PoC:
             if self.serverReady:
                 self.serverReady=False
                 if self.server_udp_hole == 0 or self.server_udp_hole == 0:
-                    print("nao foram recebidos buracos do servidor")
+                    #print("nao foram recebidos buracos do servidor")
                     return
 
-                sleep(2)
+                sleep(1)
                 cmd = "socat -d -d tcp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_tcp_hole)+",sp="+str(self.tcp_local_port)
                 cmd2 = "socat -d -d udp-listen:"+str(self.iperf_port)+",reuseaddr udp:" + ipPeer + ":" + str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
-                print(cmd)
-                print(cmd2)
+                #print(cmd)
+                #print(cmd2)
 
                 tunnelTCP_UDP = Popen(cmd.split())
                 tunnelUDP = Popen(cmd2.split())
                 result = ""
                 try:
 
-                    print("cliente iniciando teste")
+                    #print("cliente iniciando teste")
 
                     result = c.run()
 
@@ -404,8 +404,8 @@ class PoC:
                     if result.error:
                         print("result error: " + result.error)
                     else:
-                        print(self.save_results(c.bandwidth,result,0))
-                        print("teste concluido com sucesso")
+                        #print(self.save_results(c.bandwidth,result,0))
+                        #print("teste concluido com sucesso")
                         self.testDone = True
                         testSucessfull = True
 
@@ -423,10 +423,10 @@ class PoC:
             tcp_hole, socket_tcp, keep_tcp=self.open_tcp_hole()
 
             if udp_hole == -1 or tcp_hole == -1:
-                print("erro ao dar bind nos sockets do servidor")
+                #print("erro ao dar bind nos sockets do servidor")
                 return
             elif udp_hole == -2 or tcp_hole == -2:
-                print("erro ao abrir buracos do servidor")
+                #print("erro ao abrir buracos do servidor")
                 return
 
             for i in range(0, 40):
@@ -441,7 +441,7 @@ class PoC:
             keep_udp.join()
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
-                print("furando buracos para peer ip: "+ipPeer)
+                #print("furando buracos para peer ip: "+ipPeer)
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
                 #delay to make sure what i just sent dont get received by the client
@@ -454,22 +454,22 @@ class PoC:
                 self.gonnaTest=False
                 serverString = "serverReady," + idPeer + "," + str(udp_hole) + "," + str(tcp_hole)
                 self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-                print(serverString)
+                #print(serverString)
 
                 cmd = "socat -d -d udp-listen:"+str(self.tcp_local_port)+",reuseaddr tcp:localhost:"+str(self.udp_local_port)
-                print(cmd)
+                #print(cmd)
                 #nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                 tunnelTCP_UDP = Popen(cmd.split())
 
                 serverRunning=True
-                print("Servidor iniciando")
+                #print("Servidor iniciando")
                 cmdserver="iperf3 -1 -s -p "+str(self.udp_local_port)
                 s=Popen(cmdserver.split())
 
                 try:
                     s.wait(25)
                 except TimeoutExpired:
-                    print("matando servs")
+                    #print("matando servs")
                     self.close_processes([s.pid])
                 self.testDone = True
                 testSucessfull = True
@@ -477,7 +477,7 @@ class PoC:
                 self.serverRunning=False
                 self.close_processes([tunnelTCP_UDP.pid])
 
-                print("teste concluido com sucesso")
+                #print("teste concluido com sucesso")
             else:
                 print("gonnaTest nao chegou a tempo")
 
@@ -493,13 +493,13 @@ class PoC:
 
             if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
                 self.make_tcp_test("reverso")
-                print("indo pro teste tcp reverso")
+                #print("indo pro teste tcp reverso")
                 self.make_tcp_test("normal")
-                print("indo pro teste udp normal")
+                #print("indo pro teste udp normal")
                 self.make_udp_test("reverso")
-                print("indo pro teste udp reverso")
+                #print("indo pro teste udp reverso")
                 self.make_udp_test("normal")
-                print("acabou todos os testes")
+                #print("acabou todos os testes")
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
 
             sleep(5)
@@ -510,7 +510,7 @@ class PoC:
             try:
                 self.s2.bind(('0.0.0.0',self.porta_udp))
             except:
-                print("erro ao fazer bind do socket na porta 37710")
+                #print("erro ao fazer bind do socket na porta 37710")
                 #esse exit so sai da thread
                 #pensar como fechar o programa se esse bind nao funcionar
                 exit(1)
@@ -553,7 +553,7 @@ class PoC:
             elif splitData[0]=="endTest":
                 self.endTest=True
 
-            print('\rpeer: {}\n '.format(decodedData), end='')
+            #print('\rpeer: {}\n '.format(decodedData), end='')
 
     def open_udp_hole(self):
         udp_hole = open_hole(self.udp_local_port)
@@ -565,7 +565,7 @@ class PoC:
                 socket_udp.bind(("0.0.0.0", self.udp_local_port))
 
             except:
-                print("erro ao dar bind no socket udp do cliente")
+                #print("erro ao dar bind no socket udp do cliente")
                 return -1, -1, -1
 
             keep_udp = KeepHoleAlive(socket_udp, 2)
@@ -585,7 +585,7 @@ class PoC:
             try:
                 socket_tcp.bind(("0.0.0.0", self.tcp_local_port))
             except:
-                print("erro ao dar bind no socket tcp do cliente")
+                #print("erro ao dar bind no socket tcp do cliente")
                 return -1, -1, -1
 
             keep_tcp = KeepHoleAlive(socket_tcp, 2)
