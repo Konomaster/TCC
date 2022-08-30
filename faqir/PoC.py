@@ -443,6 +443,7 @@ class PoC:
             keep_udp.join()
 
             if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
+                
                 #print("furando buracos para peer ip: "+ipPeer)
                 socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ipPeer, self.client_tcp_hole))
                 socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ipPeer, self.client_udp_hole))
