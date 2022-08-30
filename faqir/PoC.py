@@ -128,11 +128,14 @@ class PoC:
         result_string = str(throughput)
         i = 0
         unit = -1
+        point=0
         while i < len(result_string):
             if i % 3 == 0 and unit < 8:
                 unit += 1
+                point=i
             i += 1
-        result_string = result_string[:1] + "." + result_string[1:]
+        if point>2:
+            result_string = result_string[:len(result_string)-point] + "." + result_string[len(result_string)-point:]
         if unit < 1:
             result_string = result_string + " bits/s"
         elif unit == 1:
