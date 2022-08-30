@@ -1,6 +1,6 @@
 import math
 import os.path
-
+from datetime import datetime
 import socket
 import subprocess
 import threading
@@ -123,6 +123,44 @@ class PoC:
         elif measure == "YiB":
             bits = average * 8.0 * math.pow(1024.0, 8.0)
         return int(bits)
+
+    def save_results(self, throughput, result, latency):
+        result_string = str(throughput)
+        i = 0
+        unit = -1
+        while i < len(result_string):
+            if i % 3 == 0 and unit < 8:
+                unit += 1
+            i += 1
+        result_string = result_string[:1] + "." + result_string[1:]
+        if unit < 1:
+            result_string = result_string + " bits/s"
+        elif unit == 1:
+            result_string = result_string + " Kbits/s"
+        elif unit == 2:
+            result_string = result_string + " Mbits/s"
+        elif unit == 3:
+            result_string = result_string + " Gbits/s"
+        elif unit == 4:
+            result_string = result_string + " Tbits/s"
+        elif unit == 5:
+            result_string = result_string + " Pbits/s"
+        elif unit == 6:
+            result_string = result_string + " Ebits/s"
+        elif unit == 7:
+            result_string = result_string + " Zbits/s"
+        elif unit == 8:
+            result_string = result_string + " Ybits/s"
+        result_string = result_string + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(result.jitter_ms,
+                                                                                                result.lost_percent,
+                                                                                                latency)
+        result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ", Vazao: " + result_string
+        file = open("results.txt", "a")
+
+        file.write(result_string)
+        file.close()
+
+        return result_string
 
     def make_tcp_test(self,direcao):
 
@@ -366,7 +404,7 @@ class PoC:
                     if result.error:
                         print("result error: " + result.error)
                     else:
-                        print(result)
+                        print(self.save_results(c.bandwidth,result,0))
                         print("teste concluido com sucesso")
                         self.testDone = True
                         testSucessfull = True

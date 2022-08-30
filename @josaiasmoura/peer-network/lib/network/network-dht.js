@@ -605,11 +605,11 @@
      }
      
      else if(splitMessage[0]==="serverReady"){
-         console.log("enviandoServerReady")
+         //console.log("enviandoServerReady")
          self.send(Buffer.from("serverReady,"+splitMessage[2]+","+splitMessage[3]),splitMessage[1])
      }
      else if(splitMessage[0]==="gonnaTest"){
-         console.log("enviandoGonnaTest")
+         //console.log("enviandoGonnaTest")
          //passar calback pro send pra fechar socket
          self.send(Buffer.from("gonnaTest,"+splitMessage[2]+","+splitMessage[3]),splitMessage[1],()=>{
              //self.__socket.close()
@@ -653,14 +653,10 @@
  function _preTestConfirmation(self,msg,peerId){
      let splitMsg=msg.split(',')
      if (splitMsg[0]==="serverReady" && splitMsg.length == 3){
-         console.log("recebidoServerReady")
          _responseMessage(self,msg)
      }
      //recebe o gonnaTest, manda pro python e ja fecha o socket
      else if(splitMsg[0]==="gonnaTest" && splitMsg.length == 3){
-         console.log("recebidoGonnaTest")
-         //self.__socket.close()
-         //self.destroy()
          _responseMessage(self,msg)
          self.emit("startTest")
  
