@@ -395,7 +395,6 @@ class PoC:
                 try:
 
                     #print("cliente iniciando teste")
-
                     result = c.run()
 
                 except:
