@@ -626,11 +626,25 @@
          console.log("destruindo dht")
          self.destroy()
          self.emit('startTest')
-     }else if(splitMessage[0]==="vazao"){
+     }
+     else if(splitMessage[0]==="vazao"){
          self.send(Buffer.from("vazao,"+splitMessage[2]),splitMessage[1])
-     }else if(splitMessage[0]==="endTest"){
+     }
+     else if(splitMessage[0]==="endTest"){
          self.send(Buffer.from("endTest"),splitMessage[1])
      }
+     else if (splitMessage[0]==="offer"){
+         self.send(Buffer.from("offer"),splitMessage[1])
+     }
+     else if (splitMessage[0]==="offer_rjct"){
+        self.send(Buffer.from("offer_rjct"),splitMessage[1])
+     }
+     else if (splitMessage[0]==="offer_res"){
+        self.send(Buffer.from("offer_res"),splitMessage[1])
+     }
+     else if (splitMessage[0]==="offer_abort"){
+        self.send(Buffer.from("offer_abort"),splitMessage[1])
+    }
      //talvez implementar isso
      /*
      else if(splitMessage[0]==="boundReceived"){
@@ -666,6 +680,18 @@
      }
      else if(splitMsg[0]==="endTest"){
          _responseMessage(self,msg);
+     }
+     else if (splitMessage[0]==="offer"){
+         _responseMessage(self,"offer,"+peerId)
+     }
+     else if (splitMessage[0]==="offer_rjct"){
+        _responseMessage(self,"offer_rjct,"+peerId)
+     }
+     else if (splitMessage[0]==="offer_res"){
+        _responseMessage(self,"offer_res,"+peerId)
+     }
+     else if (splitMessage[0]==="offer_abort"){
+        _responseMessage(self,"offer_abort,"+peerId)
      }
  }
  

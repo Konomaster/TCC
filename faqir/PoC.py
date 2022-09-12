@@ -9,22 +9,31 @@ from subprocess import Popen, PIPE, TimeoutExpired, DEVNULL
 import iperf3
 import psutil
 from stun import open_hole, KeepHoleAlive
+from peer_offer_thread import PeerOfferThread
+import random
 
 import io
 import sys
+
+DELAY_BUSCA = 5  # seconds
+NUM_RETRANSMISSOES = 1
+NUM_RETRANSMISSOES_TESTE = 3
+NUM_PARES_BUSCA = 3
+OFFER_TIMEOUT = 3  # seconds
 
 
 class PoC:
     def __init__(self):
         self.listaPares = []
+        self.s1=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.s2=socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.porta_udp = 37710
         self.porta_peernetwork=0
-        self.notPinged=False
+        #self.notPinged=False
         self.readyToTest=False
         self.hole_socket=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
         self.hole_port1=0
-        self.hole_port2=0
+        #self.hole_port2=0
         self.hole_address=""
         self.public_port1=0
         self.public_address=""
@@ -45,15 +54,22 @@ class PoC:
         self.bits_per_sec_peer=0
         self.endTest=False
 
+        self.found_peer=False
+        self.role="undefined"
+
+        self.chosen_peers = []
+        self.peers_ack = []
+        self.offer_thread=PeerOfferThread(self.s2,self.found_peer,self.chosen_peers,self.peers_ack,NUM_RETRANSMISSOES,OFFER_TIMEOUT)
+
+
     def seleciona_par(self,direcao):
-        tempLP=self.listaPares
 
         ipPeer,idPeer="",""
         portaPeer,portaCanal=0,0
 
         for i in range(0,len(self.listaPares)):
             par=self.listaPares[i].split(',')
-            if par[0] != self.public_address and int(par[3]) == self.hole_port1:
+            if par[2] == self.found_peer:
                 ipPeer, portaPeer, idPeer, portaCanal = self.listaPares[i].split(',')
 
         portaPeer = int(portaPeer)
@@ -62,7 +78,6 @@ class PoC:
         if portaPeer == 0:
             return "", "", -1
 
-        # proceeds to do testing
         myMappedAddr = list(map(int, self.public_address.split('.')))
         peerMappedAddr = list(map(int, ipPeer.split('.')))
 
@@ -489,12 +504,43 @@ class PoC:
 
             #nao esqueci de resetar o gonnatest, so escolhi nao resetar
 
+    def select_peer(self):
+        if not self.offer_thread.is_kicked_off() and self.listaPares and self.public_address != "":
+
+            real_peers = []
+            for peer in self.listaPares:
+                ipPeer, portaPeer, idPeer, portaCanal = peer.split(',')
+                if ipPeer != self.public_address:
+                    real_peers.append(idPeer)
+
+            if not real_peers:
+                return
+
+            chosen_peers = []
+            num_offers = NUM_PARES_BUSCA
+
+            if len(real_peers) < NUM_PARES_BUSCA:
+                num_offers = len(real_peers)
+
+            while len(chosen_peers) < num_offers:
+                index = random.randint(0,len(real_peers))
+
+                idPeer = real_peers[index]
+
+                if idPeer not in chosen_peers:
+                    chosen_peers.append(idPeer)
+                    self.peers_ack.append(False)
+            self.chosen_peers = chosen_peers
+
+            self.offer_thread.kick_off()
 
     def callTest(self):
         testSucessfull=False
         while True:
+            # kick off test offers if it still isnt
+            self.select_peer()
 
-            if self.listaPares!=[] and self.hole_port1>0 and not self.testDone:
+            if self.found_peer is not False and self.hole_port1 > 0:
                 self.make_tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.make_tcp_test("normal")
@@ -503,15 +549,21 @@ class PoC:
                 #print("indo pro teste udp reverso")
                 self.make_udp_test("normal")
                 #print("acabou todos os testes")
+                self.found_peer = False
+                self.role="undefined"
+                self.peers_ack=[]
+                self.chosen_peers=[]
+                sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
-
             sleep(5)
 
 
     def listen(self):
         if self.porta_udp>0:
             try:
-                self.s2.bind(('0.0.0.0',self.porta_udp))
+                self.s2.bind(('0.0.0.0', self.porta_udp))
+                self.s1.bind('0.0.0.0', self.porta_udp-1)
+                self.offer_thread.start()
             except:
                 #print("erro ao fazer bind do socket na porta 37710")
                 #esse exit so sai da thread
@@ -530,8 +582,8 @@ class PoC:
             elif splitData[0]=="holeport":
                 if sender[1] == 37711:
                     self.hole_port1 = int(splitData[1])
-                elif sender[1] == 37712:
-                    self.hole_port2 = int(splitData[1])
+                #elif sender[1] == 37712:
+                #    self.hole_port2 = int(splitData[1])
                 if self.hole_address=="":
                     self.hole_address=splitData[2]
                 #talvez dexar sempre sobescrever as portas publicas
@@ -539,10 +591,10 @@ class PoC:
                     self.public_port1=int(splitData[3])
                 if self.public_address=="":
                     self.public_address=splitData[4]
-            elif splitData[0]=="confirmNotPing":
-                self.notPinged=True
-            elif splitData[0]=="removeNotPing":
-                self.notPinged=False
+            #elif splitData[0]=="confirmNotPing":
+            #    self.notPinged=True
+            #elif splitData[0]=="removeNotPing":
+            #    self.notPinged=False
             elif splitData[0]=="serverReady":
                 self.serverReady=True
                 self.server_udp_hole=int(splitData[1])
@@ -555,6 +607,39 @@ class PoC:
                 self.bits_per_sec_self=self.extract_throughput(splitData[1])
             elif splitData[0]=="endTest":
                 self.endTest=True
+
+
+            elif splitData[0] == "offer" and self.found_peer == False:
+                # id do peer
+                # monitor
+                self.found_peer=splitData[1]
+                self.role="server"
+            elif splitData[0] == "offer" and self.found_peer == True:
+                # id do peer
+                # monitor
+                self.s1.sendto("offer_rjct,"+splitData[1], ("0.0.0.0", 37711))
+            elif splitData[0] == "offer_rjct":
+                # id do peer
+                # monitor
+                for i in range(0,len(self.chosen_peers)):
+                    if splitData[1] == self.chosen_peers[i]:
+                        self.peers_ack[i] = True
+                        break
+            elif splitData[0] == "offer_res" and self.found_peer == False:
+                # id do peer
+                # monitor
+                self.found_peer = splitData[1]
+                self.role = "client"
+            elif splitData[0] == "offer_abort" and self.found_peer is not False and splitData[1] == self.found_peer:
+                #monitor
+                self.found_peer = False
+                self.role = "undefined"
+            elif splitData[0] == "offer_abort_ack":
+                for i in range(0,len(self.chosen_peers)):
+                    if splitData[1] == self.chosen_peers[i]:
+                        self.peers_ack[i] = True
+                        break
+
 
             #print('\rpeer: {}\n '.format(decodedData), end='')
 
