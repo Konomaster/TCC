@@ -2,6 +2,7 @@ from threading import Thread
 import threading
 from time import sleep
 
+lock = threading.Lock()
 
 class PeerOfferThread(Thread):
 
@@ -15,33 +16,37 @@ class PeerOfferThread(Thread):
         self.peers_ack = peers_ack
         self.num_rtr = num_rtr
         self.offers_sent = False
-        self.offers_ended = False
+        self.offers_ended = True
+        self.myRole = "undefined"
 
     # send offers and make sure to warn offered peers
     # when found a peer
     def keep_alive(self):
         while not self.stopped():
             # monitor
+            print("pares a comunicar: ")
+            print(self.peers)
             rtr = 1 + self.num_rtr
-            if not self.offers_sent and not self.found_peer and self.peers != []:
-                self.offers_sent = True
-                for peer in self.peers:
-                    # ver se da pra colocar meu id ao invés
-                    offer_string = "offer," + peer
-                    self.socket.sendto(offer_string.encode('utf-8'), ("0.0.0.0", 37711))
+            with lock:
+                if not self.offers_sent and not self.found_peer and self.peers != []:
+                    self.offers_sent = True
+                    for peer in self.peers:
+                        # ver se da pra colocar meu id ao invés
+                        offer_string = "offer," + peer
+                        self.socket.sendto(offer_string.encode('utf-8'), ("0.0.0.0", 37711))
 
-            elif self.offers_sent and self.found_peer and rtr > 0:
-                rtr -= 1
+                elif self.offers_sent and self.found_peer and rtr > 0:
+                    rtr -= 1
 
-                for i in range(0, len(self.peers)):
-                    if self.peers[i] != self.found_peer and self.peers_ack[i] is False:
-                        abort_string = "offer_abort," + self.peers[i]
-                        self.socket.sendto(abort_string.encode('utf-8'), ("0.0.0.0", 37711))
+                    for i in range(0, len(self.peers)):
+                        if self.peers[i] != self.found_peer and self.peers_ack[i] is False:
+                            abort_string = "offer_abort," + self.peers[i]
+                            self.socket.sendto(abort_string.encode('utf-8'), ("0.0.0.0", 37711))
 
-                if rtr == 0:
-                    self.offers_ended = True
+                    if rtr == 0:
+                        self.offers_ended = True
 
-            sleep(self.timeout)
+                sleep(self.timeout)
 
     def kick_off(self):
         if self.offers_ended is True:
@@ -50,6 +55,28 @@ class PeerOfferThread(Thread):
 
     def is_kicked_off(self):
         return not self.offers_ended
+
+    @property
+    def peers(self,peers):
+        with lock:
+            self.peers=peers
+            self.peers_ack=[]
+            for _ in self.peers:
+                self.peers_ack.append(False)
+
+
+    def found_peer(self,found_peer,myRole):
+        with lock:
+            self.found_peer=found_peer
+            self.myRole=myRole
+
+
+    def ack(self,peerId):
+        with lock:
+            for i in range(0,len(self.peers)):
+                if self.peers[i] == peerId:
+                    self.peers_ack[i] = True
+
 
     def run(self) -> None:
         self.keep_alive()

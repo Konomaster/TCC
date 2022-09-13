@@ -522,8 +522,9 @@ class PoC:
             if len(real_peers) < NUM_PARES_BUSCA:
                 num_offers = len(real_peers)
 
+            self.peers_ack=[]
             while len(chosen_peers) < num_offers:
-                index = random.randint(0,len(real_peers))
+                index = random.randint(0,len(real_peers)-1)
 
                 idPeer = real_peers[index]
 
@@ -531,7 +532,10 @@ class PoC:
                     chosen_peers.append(idPeer)
                     self.peers_ack.append(False)
             self.chosen_peers = chosen_peers
-
+            self.offer_thread.peers=self.chosen_peers
+            self.offer_thread.peers_ack=self.peers_ack
+            print("chosen_peers:")
+            print(real_peers)
             self.offer_thread.kick_off()
 
     def callTest(self):
@@ -539,7 +543,7 @@ class PoC:
         while True:
             # kick off test offers if it still isnt
             self.select_peer()
-
+         #   print("chamou select peer")
             if self.found_peer is not False and self.hole_port1 > 0:
                 self.make_tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
@@ -550,6 +554,7 @@ class PoC:
                 self.make_udp_test("normal")
                 #print("acabou todos os testes")
                 self.found_peer = False
+                self.offer_thread.found_peer = False
                 self.role="undefined"
                 self.peers_ack=[]
                 self.chosen_peers=[]
@@ -571,7 +576,6 @@ class PoC:
                 exit(1)
 
         while True:
-
             dataa,sender = self.s2.recvfrom(1024)
             decodedData=dataa.decode('utf-8')
             splitData=decodedData.split(',')
@@ -612,8 +616,9 @@ class PoC:
             elif splitData[0] == "offer" and self.found_peer == False:
                 # id do peer
                 # monitor
-                self.found_peer=splitData[1]
+                self.found_peer = splitData[1]
                 self.role="server"
+                self.offer_thread.found_peer = splitData[1]
             elif splitData[0] == "offer" and self.found_peer == True:
                 # id do peer
                 # monitor
@@ -630,10 +635,12 @@ class PoC:
                 # monitor
                 self.found_peer = splitData[1]
                 self.role = "client"
+                self.offer_thread.found_peer = splitData[1]
             elif splitData[0] == "offer_abort" and self.found_peer is not False and splitData[1] == self.found_peer:
                 #monitor
                 self.found_peer = False
                 self.role = "undefined"
+                self.offer_thread.found_peer = False
             elif splitData[0] == "offer_abort_ack":
                 for i in range(0,len(self.chosen_peers)):
                     if splitData[1] == self.chosen_peers[i]:
@@ -641,7 +648,7 @@ class PoC:
                         break
 
 
-            #print('\rpeer: {}\n '.format(decodedData), end='')
+           # print('\rpeer: {}\n '.format(decodedData), end='')
 
     def open_udp_hole(self):
         udp_hole = open_hole(self.udp_local_port)
