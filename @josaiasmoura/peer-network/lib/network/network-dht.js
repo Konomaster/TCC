@@ -665,20 +665,20 @@
  }
  
  function _preTestConfirmation(self,msg,peerId){
-     let splitMsg=msg.split(',')
-     if (splitMsg[0]==="serverReady" && splitMsg.length == 3){
+     let splitMessage=msg.split(',')
+     if (splitMessage[0]==="serverReady" && splitMessage.length == 3){
          _responseMessage(self,msg)
      }
      //recebe o gonnaTest, manda pro python e ja fecha o socket
-     else if(splitMsg[0]==="gonnaTest" && splitMsg.length == 3){
+     else if(splitMessage[0]==="gonnaTest" && splitMessage.length == 3){
          _responseMessage(self,msg)
          self.emit("startTest")
  
      }
-     else if (splitMsg[0]==="vazao" && splitMsg.length==2){
+     else if (splitMessage[0]==="vazao" && splitMessage.length==2){
          _responseMessage(self,msg)
      }
-     else if(splitMsg[0]==="endTest"){
+     else if(splitMessage[0]==="endTest"){
          _responseMessage(self,msg);
      }
      else if (splitMessage[0]==="offer"){
