@@ -13,8 +13,8 @@ class PeerOfferThread(Thread):
         self.found_peer = False # done
         self.my_role = "undefined" # done
         self.timeout = timeout
-        self.peers = [] #
-        self.peers_ack = [] #
+        self._peers = [] #
+        self._peers_ack = [] #
         self.num_rtr = num_rtr
         self.offers_sent = False
         self.offers_ended = True
@@ -25,12 +25,12 @@ class PeerOfferThread(Thread):
         while not self.stopped():
             # monitor
             print("pares a comunicar: ")
-            print(self.peers)
+            print(self._peers)
             rtr = 1 + self.num_rtr
             with lock:
-                if not self.offers_sent and not self.found_peer and self.peers != []:
+                if not self.offers_sent and not self.found_peer and self._peers != []:
                     self.offers_sent = True
-                    for peer in self.peers:
+                    for peer in self._peers:
                         # ver se da pra colocar meu id ao invés
                         offer_string = "offer," + peer
                         self.socket.sendto(offer_string.encode('utf-8'), ("0.0.0.0", 37711))
@@ -38,9 +38,9 @@ class PeerOfferThread(Thread):
                 elif self.offers_sent and self.found_peer and rtr > 0:
                     rtr -= 1
 
-                    for i in range(0, len(self.peers)):
-                        if self.peers[i] != self.found_peer and self.peers_ack[i] is False:
-                            abort_string = "offer_abort," + self.peers[i]
+                    for i in range(0, len(self._peers)):
+                        if self._peers[i] != self.found_peer and self._peers_ack[i] is False:
+                            abort_string = "offer_abort," + self._peers[i]
                             self.socket.sendto(abort_string.encode('utf-8'), ("0.0.0.0", 37711))
 
                     if rtr == 0:
@@ -60,21 +60,21 @@ class PeerOfferThread(Thread):
     def peers(self,peers):
         with lock:
             if self.offers_ended:
-                self.peers=peers
-                self.peers_ack=[]
-                for _ in self.peers:
-                    self.peers_ack.append(False)
+                self._peers=peers
+                self._peers_ack=[]
+                for _ in self._peers:
+                    self._peers_ack.append(False)
 
     @property
     def found_peer(self):
         with lock:
             return self.found_peer
 
-    @found_peer.setter
-    def found_peer(self,found_peer_myole_tuple):
+    def found_peer(self,found_peer_myrole):
         with lock:
-            self.found_peer=found_peer_myole_tuple[0]
-            self.my_role=found_peer_myole_tuple[1]
+            peer, role = found_peer_myrole
+            self.found_peer = peer
+            self.my_role = role
 
     @property
     def role(self):
@@ -84,9 +84,9 @@ class PeerOfferThread(Thread):
 
     def ack(self,peerId):
         with lock:
-            for i in range(0,len(self.peers)):
-                if self.peers[i] == peerId:
-                    self.peers_ack[i] = True
+            for i in range(0,len(self._peers)):
+                if self._peers[i] == peerId:
+                    self._peers_ack[i] = True
 
 
     def run(self) -> None:

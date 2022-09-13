@@ -548,7 +548,7 @@ class PoC:
                 self.make_udp_test("normal")
                 #print("acabou todos os testes")
                 self.offer_thread.peers = []
-                self.offer_thread.found_peer = (False,"undefined")
+                self.offer_thread.found_peer((False,"undefined"))
                 sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
             sleep(5)
@@ -606,7 +606,7 @@ class PoC:
             elif splitData[0] == "offer" and not self.offer_thread.found_peer:
                 # id do peer
                 # monitor
-                self.offer_thread.found_peer = (splitData[1],"server")
+                self.offer_thread.found_peer((splitData[1],"server"))
                 self.s1.sendto("offer_res," + splitData[1], ("0.0.0.0", 37711))
             elif splitData[0] == "offer" and self.offer_thread.found_peer:
                 # id do peer
@@ -620,10 +620,10 @@ class PoC:
                 # id do peer
                 # monitor
                 self.offer_thread.ack(splitData[1])
-                self.offer_thread.found_peer = (splitData[1],"client")
+                self.offer_thread.found_peer((splitData[1],"client"))
             elif splitData[0] == "offer_abort" and self.offer_thread.found_peer and splitData[1] == self.offer_thread.found_peer:
                 #monitor
-                self.offer_thread.found_peer = (False,"undefined")
+                self.offer_thread.found_peer((False,"undefined"))
                 self.s1.sendto("offer_abort_ack," + splitData[1], ("0.0.0.0", 37711))
             elif splitData[0] == "offer_abort_ack":
                 self.offer_thread.ack(splitData[1])
