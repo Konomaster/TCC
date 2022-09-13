@@ -65,12 +65,12 @@ class PeerOfferThread(Thread):
                 for _ in self.peers:
                     self.peers_ack.append(False)
 
-    @property
-    def found_peer(self):
+
+    def get_found_peer(self):
         with lock:
             return self.found_peer
 
-    def found_peer(self,found_peer_myrole):
+    def set_found_peer(self,found_peer_myrole):
         with lock:
             peer, role = found_peer_myrole
             self.found_peer = peer

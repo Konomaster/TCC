@@ -65,7 +65,7 @@ class PoC:
 
         for i in range(0,len(self.listaPares)):
             par=self.listaPares[i].split(',')
-            if par[2] == self.offer_thread.found_peer:
+            if par[2] == self.offer_thread.get_found_peer:
                 ipPeer, portaPeer, idPeer, portaCanal = self.listaPares[i].split(',')
 
         portaPeer = int(portaPeer)
@@ -538,7 +538,7 @@ class PoC:
             # kick off test offers if it still isnt
             self.select_peer()
          #   print("chamou select peer")
-            if self.offer_thread.found_peer and self.hole_port1 > 0:
+            if self.offer_thread.get_found_peer and self.hole_port1 > 0:
                 self.make_tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.make_tcp_test("normal")
@@ -548,7 +548,7 @@ class PoC:
                 self.make_udp_test("normal")
                 #print("acabou todos os testes")
                 self.offer_thread.set_peers([])
-                self.offer_thread.found_peer((False,"undefined"))
+                self.offer_thread.set_found_peer((False,"undefined"))
                 sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
             sleep(5)
@@ -603,12 +603,12 @@ class PoC:
             elif splitData[0]=="endTest":
                 self.endTest=True
 
-            elif splitData[0] == "offer" and not self.offer_thread.found_peer:
+            elif splitData[0] == "offer" and not self.offer_thread.get_found_peer:
                 # id do peer
                 # monitor
-                self.offer_thread.found_peer((splitData[1],"server"))
+                self.offer_thread.set_found_peer((splitData[1],"server"))
                 self.s1.sendto("offer_res," + splitData[1], ("0.0.0.0", 37711))
-            elif splitData[0] == "offer" and self.offer_thread.found_peer:
+            elif splitData[0] == "offer" and self.offer_thread.get_found_peer:
                 # id do peer
                 # monitor
                 self.s1.sendto("offer_rjct,"+splitData[1], ("0.0.0.0", 37711))
@@ -616,14 +616,14 @@ class PoC:
                 # id do peer
                 # monitor
                 self.offer_thread.ack(splitData[1])
-            elif splitData[0] == "offer_res" and self.offer_thread.found_peer == False:
+            elif splitData[0] == "offer_res" and self.offer_thread.get_found_peer == False:
                 # id do peer
                 # monitor
                 self.offer_thread.ack(splitData[1])
-                self.offer_thread.found_peer((splitData[1],"client"))
-            elif splitData[0] == "offer_abort" and self.offer_thread.found_peer and splitData[1] == self.offer_thread.found_peer:
+                self.offer_thread.set_found_peer((splitData[1],"client"))
+            elif splitData[0] == "offer_abort" and self.offer_thread.get_found_peer and splitData[1] == self.offer_thread.get_found_peer:
                 #monitor
-                self.offer_thread.found_peer((False,"undefined"))
+                self.offer_thread.set_found_peer((False,"undefined"))
                 self.s1.sendto("offer_abort_ack," + splitData[1], ("0.0.0.0", 37711))
             elif splitData[0] == "offer_abort_ack":
                 self.offer_thread.ack(splitData[1])
