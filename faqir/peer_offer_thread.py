@@ -6,18 +6,18 @@ lock = threading.Lock()
 
 class PeerOfferThread(Thread):
 
-    def __init__(self, socket, found_peer, peers, peers_ack, num_rtr, timeout):
+    def __init__(self, socket, num_rtr, timeout):
         super(PeerOfferThread, self).__init__()
         self._stop_event = threading.Event()
         self.socket = socket
-        self.found_peer = found_peer
+        self.found_peer = False # done
+        self.my_role = "undefined" # done
         self.timeout = timeout
-        self.peers = peers
-        self.peers_ack = peers_ack
+        self.peers = [] #
+        self.peers_ack = [] #
         self.num_rtr = num_rtr
         self.offers_sent = False
         self.offers_ended = True
-        self.myRole = "undefined"
 
     # send offers and make sure to warn offered peers
     # when found a peer
@@ -59,16 +59,27 @@ class PeerOfferThread(Thread):
     @property
     def peers(self,peers):
         with lock:
-            self.peers=peers
-            self.peers_ack=[]
-            for _ in self.peers:
-                self.peers_ack.append(False)
+            if self.offers_ended:
+                self.peers=peers
+                self.peers_ack=[]
+                for _ in self.peers:
+                    self.peers_ack.append(False)
 
-
-    def found_peer(self,found_peer,myRole):
+    @property
+    def found_peer(self):
         with lock:
-            self.found_peer=found_peer
-            self.myRole=myRole
+            return self.found_peer
+
+    @found_peer.setter
+    def found_peer(self,found_peer_myole_tuple):
+        with lock:
+            self.found_peer=found_peer_myole_tuple[0]
+            self.my_role=found_peer_myole_tuple[1]
+
+    @property
+    def role(self):
+        with lock:
+            return self.my_role
 
 
     def ack(self,peerId):
