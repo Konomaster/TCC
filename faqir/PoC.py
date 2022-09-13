@@ -607,11 +607,13 @@ class PoC:
                 # id do peer
                 # monitor
                 self.offer_thread.set_found_peer((splitData[1],"server"))
-                self.s1.sendto("offer_res," + splitData[1], ("0.0.0.0", 37711))
+                sendstr="offer_res," + splitData[1]
+                self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
             elif splitData[0] == "offer" and self.offer_thread.get_found_peer:
                 # id do peer
                 # monitor
-                self.s1.sendto("offer_rjct,"+splitData[1], ("0.0.0.0", 37711))
+                sendstr="offer_rjct,"+splitData[1]
+                self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
             elif splitData[0] == "offer_rjct":
                 # id do peer
                 # monitor
@@ -624,7 +626,8 @@ class PoC:
             elif splitData[0] == "offer_abort" and self.offer_thread.get_found_peer and splitData[1] == self.offer_thread.get_found_peer:
                 #monitor
                 self.offer_thread.set_found_peer((False,"undefined"))
-                self.s1.sendto("offer_abort_ack," + splitData[1], ("0.0.0.0", 37711))
+                sendstr="offer_abort_ack," + splitData[1]
+                self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
             elif splitData[0] == "offer_abort_ack":
                 self.offer_thread.ack(splitData[1])
 
