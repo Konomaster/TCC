@@ -562,7 +562,7 @@ class PoC:
         if self.porta_udp>0:
             try:
                 self.s2.bind(('0.0.0.0', self.porta_udp))
-                self.s1.bind('0.0.0.0', self.porta_udp-1)
+                self.s1.bind(('0.0.0.0', self.porta_udp-1))
                 self.offer_thread.start()
             except:
                 #print("erro ao fazer bind do socket na porta 37710")
