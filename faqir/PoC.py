@@ -526,7 +526,7 @@ class PoC:
                 if idPeer not in chosen_peers:
                     chosen_peers.append(idPeer)
 
-            self.offer_thread.peers(chosen_peers)
+            self.offer_thread.set_peers(chosen_peers)
 
             print("chosen_peers:")
             print(real_peers)
@@ -547,7 +547,7 @@ class PoC:
                 #print("indo pro teste udp reverso")
                 self.make_udp_test("normal")
                 #print("acabou todos os testes")
-                self.offer_thread.peers([])
+                self.offer_thread.set_peers([])
                 self.offer_thread.found_peer((False,"undefined"))
                 sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:

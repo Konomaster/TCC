@@ -57,7 +57,7 @@ class PeerOfferThread(Thread):
         return not self.offers_ended
 
 
-    def peers(self,peers):
+    def set_peers(self,peers):
         with lock:
             if self.offers_ended:
                 self.peers=peers
