@@ -628,29 +628,41 @@
          self.emit('startTest')
      }
      else if(splitMessage[0]==="vazao"){
-         self.send(Buffer.from("vazao,"+splitMessage[2]),splitMessage[1])
+         _sendIfReady(self,"vazao,"+splitMessage[2],splitMessage[1])
      }
      else if(splitMessage[0]==="endTest"){
-         self.send(Buffer.from("endTest"),splitMessage[1])
+         _sendIfReady(self,"endTest",splitMessage[1])
      }
      else if (splitMessage[0]==="offer"){
-         self.send(Buffer.from("offer"),splitMessage[1])
+         _sendIfReady(self,"offer",splitMessage[1])
      }
      else if (splitMessage[0]==="offer_rjct"){
-        self.send(Buffer.from("offer_rjct"),splitMessage[1])
+        _sendIfReady(self,"offer_rjct",splitMessage[1])
      }
      else if (splitMessage[0]==="offer_res"){
-        self.send(Buffer.from("offer_res"),splitMessage[1])
+        _sendIfReady(self,"offer_res",splitMessage[1])
      }
      else if (splitMessage[0]==="offer_abort"){
-        self.send(Buffer.from("offer_abort"),splitMessage[1])
-    }
+        _sendIfReady(self,"offer_abort",splitMessage[1])
+     }
+     else if (splitMessage[0]==="offer_abort_ack"){
+        _sendIfReady(self,"offer_abort_ack",splitMessage[1])
+     }
      //talvez implementar isso
      /*
      else if(splitMessage[0]==="boundReceived"){
          self.__boundSent=true
      }
      */
+ }
+
+ function _sendIfReady(self,message,destination){
+    if (self.isAlive()){
+        self.send(Buffer.from(message),destination)
+    }
+    else{
+        self.__queue.push(()=>{self.send(Buffer.from(message),destination)})
+    }
  }
  
  function _responseMessage(self,message){
@@ -692,6 +704,9 @@
      }
      else if (splitMessage[0]==="offer_abort"){
         _responseMessage(self,"offer_abort,"+peerId)
+     }
+     else if (splitMessage[0]==="offer_abort_ack"){
+        _responseMessage(self,"offer_abort_ack,"+peerId)
      }
  }
  
