@@ -225,7 +225,8 @@ class PoC:
                 result = ""
                 try:
                     #print("cliente iniciando teste")
-                    str1="pv -f -B 1450 -a /dev/random"
+                    #str1="pv -f -B 1450 -a /dev/random"
+                    str1 = "pv -f -B 1450 -a stun.py"
                     str2="socat -b 1450 - udp:"+ipPeer+":"+str(self.server_udp_hole)+",sp="+str(self.udp_local_port)
                     t1=Popen(str1.split(),stderr=PIPE,stdout=PIPE)
                     t2=Popen(str2.split(),stdin=t1.stdout)
@@ -303,8 +304,7 @@ class PoC:
                 t2 = Popen(str2.split(),stdin=t1.stdout,stderr=PIPE,stdout=DEVNULL)
                 t1.stdout.close()
 
-                sleep(25)
-                #print("matando servidor: "+str(t1.pid))
+                sleep(15)
                 self.close_processes([t1.pid,t2.pid])
                 max_bits=0
                 max="0,00 B/s"
