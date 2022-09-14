@@ -25,7 +25,7 @@ class PeerOfferThread(Thread):
     def keep_alive(self):
         while not self.stopped():
             # monitor
-            print("pares a comunicar: ")
+            print("pares a comunicar\n")
             print(self.peers)
 
             with lock:

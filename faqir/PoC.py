@@ -539,7 +539,7 @@ class PoC:
             self.select_peer()
          #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
-                print("achouPeer")
+                print("achouPeer\n")
                 self.make_tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.make_tcp_test("normal")
@@ -553,7 +553,7 @@ class PoC:
                 sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
             else:
-                print("ainda nao achou peer")
+                print("ainda nao achou peer\n")
             sleep(5)
 
 
