@@ -30,6 +30,7 @@ class PeerOfferThread(Thread):
 
             with lock:
                 if not self.offers_sent and not self.found_peer and self.peers != []:
+                    self.offers_ended = False
                     self.offers_sent = True
                     for peer in self.peers:
                         # ver se da pra colocar meu id ao invés
