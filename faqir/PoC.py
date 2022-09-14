@@ -65,7 +65,7 @@ class PoC:
 
         for i in range(0,len(self.listaPares)):
             par=self.listaPares[i].split(',')
-            if par[2] == self.offer_thread.get_found_peer:
+            if par[2] == self.offer_thread.get_found_peer():
                 ipPeer, portaPeer, idPeer, portaCanal = self.listaPares[i].split(',')
 
         portaPeer = int(portaPeer)
@@ -538,7 +538,8 @@ class PoC:
             # kick off test offers if it still isnt
             self.select_peer()
          #   print("chamou select peer")
-            if self.offer_thread.get_found_peer and self.hole_port1 > 0:
+            if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
+                print("achouPeer")
                 self.make_tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.make_tcp_test("normal")
@@ -551,6 +552,8 @@ class PoC:
                 self.offer_thread.set_found_peer((False,"undefined"))
                 sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
+            else:
+                print("ainda nao achou peer")
             sleep(5)
 
 
@@ -603,13 +606,13 @@ class PoC:
             elif splitData[0]=="endTest":
                 self.endTest=True
 
-            elif splitData[0] == "offer" and not self.offer_thread.get_found_peer:
+            elif splitData[0] == "offer" and not self.offer_thread.get_found_peer():
                 # id do peer
                 # monitor
                 self.offer_thread.set_found_peer((splitData[1],"server"))
                 sendstr="offer_res," + splitData[1]
                 self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
-            elif splitData[0] == "offer" and self.offer_thread.get_found_peer:
+            elif splitData[0] == "offer" and self.offer_thread.get_found_peer():
                 # id do peer
                 # monitor
                 sendstr="offer_rjct,"+splitData[1]
@@ -618,12 +621,12 @@ class PoC:
                 # id do peer
                 # monitor
                 self.offer_thread.ack(splitData[1])
-            elif splitData[0] == "offer_res" and self.offer_thread.get_found_peer == False:
+            elif splitData[0] == "offer_res" and self.offer_thread.get_found_peer() == False:
                 # id do peer
                 # monitor
                 self.offer_thread.ack(splitData[1])
                 self.offer_thread.set_found_peer((splitData[1],"client"))
-            elif splitData[0] == "offer_abort" and self.offer_thread.get_found_peer and splitData[1] == self.offer_thread.get_found_peer:
+            elif splitData[0] == "offer_abort" and self.offer_thread.get_found_peer() and splitData[1] == self.offer_thread.get_found_peer():
                 #monitor
                 self.offer_thread.set_found_peer((False,"undefined"))
                 sendstr="offer_abort_ack," + splitData[1]
