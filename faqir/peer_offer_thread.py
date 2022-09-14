@@ -15,7 +15,8 @@ class PeerOfferThread(Thread):
         self.timeout = timeout
         self.peers = [] #
         self.peers_ack = [] #
-        self.num_rtr = num_rtr
+        self.num_rtr_original = num_rtr + 1
+        self.num_rtr = num_rtr +1
         self.offers_sent = False
         self.offers_ended = True
 
@@ -26,7 +27,7 @@ class PeerOfferThread(Thread):
             # monitor
             print("pares a comunicar: ")
             print(self.peers)
-            rtr = 1 + self.num_rtr
+
             with lock:
                 if not self.offers_sent and not self.found_peer and self.peers != []:
                     self.offers_sent = True
@@ -34,24 +35,26 @@ class PeerOfferThread(Thread):
                         # ver se da pra colocar meu id ao invés
                         offer_string = "offer," + peer
                         self.socket.sendto(offer_string.encode('utf-8'), ("0.0.0.0", 37711))
+                        print("enviou offer")
 
-                elif self.offers_sent and self.found_peer and rtr > 0:
-                    rtr -= 1
+                elif self.offers_sent and self.found_peer and self.num_rtr > 0:
+                    self.num_rtr -= 1
 
                     for i in range(0, len(self.peers)):
                         if self.peers[i] != self.found_peer and self.peers_ack[i] is False:
                             abort_string = "offer_abort," + self.peers[i]
                             self.socket.sendto(abort_string.encode('utf-8'), ("0.0.0.0", 37711))
 
-                    if rtr == 0:
+                    if self.num_rtr == 0:
                         self.offers_ended = True
-
+                print("num rtr:"+str(self.num_rtr))
                 sleep(self.timeout)
 
     def kick_off(self):
         if self.offers_ended is True:
             self.offers_ended = False
             self.offers_sent = False
+            self.num_rtr = self.num_rtr_original
 
     def is_kicked_off(self):
         return not self.offers_ended
