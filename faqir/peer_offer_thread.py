@@ -38,13 +38,14 @@ class PeerOfferThread(Thread):
                         self.socket.sendto(offer_string.encode('utf-8'), ("0.0.0.0", 37711))
                         print("enviou offer")
 
-                elif self.offers_sent and self.found_peer and self.num_rtr > 0:
+                elif self.offers_sent and self.num_rtr > 0:
                     self.num_rtr -= 1
 
-                    for i in range(0, len(self.peers)):
-                        if self.peers[i] != self.found_peer and self.peers_ack[i] is False:
-                            abort_string = "offer_abort," + self.peers[i]
-                            self.socket.sendto(abort_string.encode('utf-8'), ("0.0.0.0", 37711))
+                    if self.found_peer:
+                        for i in range(0, len(self.peers)):
+                            if self.peers[i] != self.found_peer and self.peers_ack[i] is False:
+                                abort_string = "offer_abort," + self.peers[i]
+                                self.socket.sendto(abort_string.encode('utf-8'), ("0.0.0.0", 37711))
 
                     if self.num_rtr == 0:
                         self.offers_ended = True
