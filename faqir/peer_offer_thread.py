@@ -77,10 +77,9 @@ class PeerOfferThread(Thread):
 
     def set_found_peer(self,found_peer_myrole):
         with lock:
-            if self.found_peer is False:
-                peer, role = found_peer_myrole
-                self.found_peer = peer
-                self.my_role = role
+            peer, role = found_peer_myrole
+            self.found_peer = peer
+            self.my_role = role
 
 
     def role(self):
