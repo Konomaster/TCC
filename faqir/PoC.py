@@ -309,7 +309,7 @@ class PoC:
                 max_bits=0
                 max="0,00 B/s"
                 for line in t2.stderr:
-                    l=line.decode('utf-8').rstrip("\n").rstrip("\r").split("\r")
+                    l = line.decode('utf-8').rstrip("\n").rstrip("\r").split("\r")
                     for step in l:
                         clean_step=step.rstrip("]").lstrip("[")
                         bits=self.extract_throughput(clean_step)
@@ -528,7 +528,7 @@ class PoC:
 
             self.offer_thread.set_peers(chosen_peers)
 
-            print("chosen_peers:")
+            print("select_peer() chosen_peers:\n")
             print(real_peers)
             self.offer_thread.kick_off()
 

@@ -48,8 +48,8 @@ class PeerOfferThread(Thread):
 
                     if self.num_rtr == 0:
                         self.offers_ended = True
-                print("num rtr:"+str(self.num_rtr))
-                sleep(self.timeout)
+            print("num rtr:"+str(self.num_rtr))
+            sleep(self.timeout)
 
     def kick_off(self):
         if self.offers_ended is True:
