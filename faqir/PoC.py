@@ -550,6 +550,7 @@ class PoC:
                 #print("acabou todos os testes")
                 self.offer_thread.set_peers([])
                 self.offer_thread.set_found_peer((False,"undefined"))
+                print("found peer = False\n")
                 sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
             else:
