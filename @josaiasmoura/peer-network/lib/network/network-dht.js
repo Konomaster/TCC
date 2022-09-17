@@ -631,7 +631,10 @@
          _sendIfReady(self,"vazao,"+splitMessage[2],splitMessage[1])
      }
      else if(splitMessage[0]==="endTest"){
-         _sendIfReady(self,"endTest",splitMessage[1])
+         _sendIfReady(self,"endTest",splitMessage[splitMessage.length-1])
+     }
+     else if(splitMessage[0]==="endTest_ack"){
+        _sendIfReady(self,"endTest_ack",splitMessage[splitMessage.length-1])
      }
      else if (splitMessage[0]==="offer"){
          _sendIfReady(self,"offer",splitMessage[1])
@@ -691,7 +694,11 @@
          _responseMessage(self,msg)
      }
      else if(splitMessage[0]==="endTest"){
-         _responseMessage(self,msg);
+         _responseMessage(self,msg+","+peerId);   
+        
+     }
+     else if(splitMessage[0]==="endTest_ack"){
+        _responseMessage(self,msg+","+peerId)
      }
      else if (splitMessage[0]==="offer"){
          _responseMessage(self,"offer,"+peerId)

@@ -21,6 +21,11 @@ NUM_RETRANSMISSOES_TESTE = 3
 NUM_PARES_BUSCA = 3
 OFFER_TIMEOUT = 3  # seconds
 
+CLIENT = 1
+SERVER = 0
+
+lock=threading.Lock()
+
 
 class PoC:
     def __init__(self):
@@ -176,6 +181,211 @@ class PoC:
 
         return result_string
 
+
+    def tcp_test(self, direcao):
+        S_OUVIR = 1
+        S_TESTAR = 2
+        S_ENVIAR_RESULTADOS = 3
+        S_FINALIZAR = 5
+
+        estado = 1
+        max_retr = 3
+        result_retr = 3
+        result_retr_timeout = 6 # 3 segundos porcausa do sleep de 0.5
+
+        ip_peer, id_peer, my_role = self.seleciona_par(direcao)
+
+        if ip_peer == "":
+            return
+
+        udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+        tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+        if udp_hole == -1 or tcp_hole == -1:
+            # print("erro ao dar bind nos sockets do cliente")
+            return
+        elif udp_hole == -2 or tcp_hole == -2:
+            # print("erro ao abrir buracos do cliente")
+            return
+
+        if my_role is CLIENT:
+
+            C_INICIAR = 1
+            C_TESTAR = 2
+            C_RECEBER_RESULTADOS = 3
+            C_FINALIZAR = 5
+
+            while estado != C_FINALIZAR:
+
+                if estado is C_INICIAR:
+
+                    if max_retr == 0:
+                        estado = C_FINALIZAR
+                        continue
+                    max_retr -= 1
+
+                    gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
+                    self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
+
+                    # esperar por tantos segundos o servidor falar que ja ta pronto
+                    for i in range(0, 10):
+                        sleep(0.5)
+                        if self.serverReady:
+                            self.serverReady = False
+                            estado = C_TESTAR
+                            break
+
+                    keep_tcp.stop()
+                    keep_udp.stop()
+                    keep_tcp.join()
+                    keep_udp.join()
+                    socket_tcp.close()
+                    socket_udp.close()
+
+                if estado is C_TESTAR:
+
+                    if self.server_udp_hole == 0 or self.server_udp_hole == 0:
+                        # print("nao foram recebidos buracos do servidor")
+                        estado = C_FINALIZAR
+                        continue
+
+                    sleep(1)
+
+                    try:
+                        # str1="pv -f -B 1450 -a /dev/random"
+                        str1 = "pv -f -B 1450 -a stun.py"
+                        str2 = "socat -b 1450 - udp:" + ip_peer + ":" + str(self.server_udp_hole) + ",sp=" + str(
+                            self.udp_local_port)
+                        t1 = Popen(str1.split(), stderr=PIPE, stdout=PIPE)
+                        t2 = Popen(str2.split(), stdin=t1.stdout)
+                        t1.stdout.close()
+                        sleep(10)
+                        self.close_processes([t1.pid, t2.pid])
+                        for line in t1.stderr:
+                            step = line.decode('utf-8').split("\r")[-2].lstrip("[").rstrip("]")
+                            self.bits_per_sec_sender = self.extract_throughput(step)
+                            break
+                        estado = C_RECEBER_RESULTADOS
+                    except:
+                        print('exception no teste (cliente)')
+                        estado = C_INICIAR
+
+                if estado is C_RECEBER_RESULTADOS:
+
+                    #Tempo suficiente pra par fazer as retransmissoes de
+                    #resultado e chegar para o cliente
+                    for i in range(0, result_retr_timeout*result_retr + 1):
+                        sleep(0.5)
+                        if self.endTest:
+                            self.testDone = True
+                            break
+
+                    estado = C_FINALIZAR
+
+
+
+        elif my_role is SERVER:
+
+            client_result = "0.00 B/s"
+
+            while estado != S_FINALIZAR:
+
+                if estado is S_OUVIR:
+
+                    estado = S_FINALIZAR
+
+                    for i in range(0,40):
+                        sleep(0.5)
+                        if self.gonnaTest:
+                            self.gonnaTest = False
+                            estado = S_TESTAR
+                            break
+
+                    keep_tcp.stop()
+                    keep_udp.stop()
+                    keep_tcp.join()
+                    keep_udp.join()
+
+                    if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
+                        # print("furando buracos para peer ip: "+ipPeer)
+                        socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.client_tcp_hole))
+                        socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ip_peer, self.client_udp_hole))
+                        # make sure client doesnt get above messages
+                        sleep(3)
+
+                    socket_tcp.close()
+                    socket_udp.close()
+
+                elif estado is S_TESTAR:
+
+                    if max_retr == 0:
+                        estado = S_FINALIZAR
+                        continue
+                    max_retr -= 1
+
+                    serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
+                    self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+
+                    # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
+                    serverRunning = True
+                    # print("Servidor iniciando")
+                    str1 = "nc -u -l " + str(self.udp_local_port)
+                    str2 = "pv -f -r"
+                    # "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
+                    t1 = Popen(str1.split(), stdout=PIPE)
+                    t2 = Popen(str2.split(), stdin=t1.stdout, stderr=PIPE, stdout=DEVNULL)
+                    t1.stdout.close()
+
+                    retry = False
+                    for i in range(0,15):
+                        sleep(1)
+                        if self.gonnaTest:
+                            self.gonnaTest = False
+                            retry = True
+                            break
+
+                    self.close_processes([t1.pid, t2.pid])
+
+                    if retry:
+                        continue
+
+                    max_bits = 0
+                    max = "0,00 B/s"
+                    for line in t2.stderr:
+                        l = line.decode('utf-8').rstrip("\n").rstrip("\r").split("\r")
+                        for step in l:
+                            clean_step = step.rstrip("]").lstrip("[")
+                            bits = self.extract_throughput(clean_step)
+                            if bits > max_bits:
+                                max_bits = bits
+                                max = clean_step
+                        self.bits_per_sec_peer = max_bits
+                        break
+                    client_result = max.replace(",", ".")
+                    estado = S_ENVIAR_RESULTADOS
+
+                elif estado is S_ENVIAR_RESULTADOS:
+
+                    #somente num_retr tentativas de mandar resultado
+                    if result_retr == 0:
+                        estado = S_FINALIZAR
+                        continue
+                    result_retr -= 1
+
+                    # envia resultado ao par
+                    vazao = "vazao," + id_peer + "," + client_result
+                    self.s2.sendto(vazao.encode('utf-8'), ("0.0.0.0", 37711))
+
+                    # timeout de 3 secs
+                    for i in range(0,result_retr_timeout):
+                        sleep(0.5)
+                        if self.endTest:
+                            estado = S_FINALIZAR
+                            self.testDone = True
+                            self.serverRunning = False
+                            break
+
+
     def make_tcp_test(self,direcao):
 
         ipPeer, idPeer, clientOrServer = self.seleciona_par(direcao)
@@ -220,7 +430,7 @@ class PoC:
                     #print("nao foram recebidos buracos do servidor")
                     return
 
-                sleep(2)
+                sleep(1)
 
                 result = ""
                 try:
@@ -335,7 +545,6 @@ class PoC:
             self.client_tcp_hole = 0
 
             #nao esqueci de resetar o gonnatest, so escolhi nao resetar
-
 
     def make_udp_test(self,direcao):
         testSucessfull=False
@@ -540,6 +749,7 @@ class PoC:
          #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
                 print("achouPeer\n")
+                self.endTest = False
                 self.make_tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.make_tcp_test("normal")
@@ -604,31 +814,32 @@ class PoC:
                 self.client_tcp_hole=int(splitData[2])
             elif splitData[0]=="vazao":
                 self.bits_per_sec_self=self.extract_throughput(splitData[1])
-            elif splitData[0]=="endTest":
+            elif splitData[0] == "endTest" and self.offer_thread.get_found_peer() == splitData[len(splitData)-1]:
                 self.endTest=True
-
+                if len(splitData) == 3:
+                    self.bits_per_sec_self = self.extract_throughput(splitData[1])
+                sendstr="endTest_ack,"+splitData[len(splitData)-1]
+                self.s1.sendto(sendstr.encode('utf-8'),  ("0.0.0.0", 37711))
+            elif splitData[0] == "endTest_ack" and self.offer_thread.get_found_peer() == splitData[len(splitData)-1]:
+                self.endTest=True
             elif splitData[0] == "offer" and not self.offer_thread.get_found_peer():
-                # id do peer
-                # monitor
+
                 self.offer_thread.set_found_peer((splitData[1],"server"))
                 sendstr="offer_res," + splitData[1]
                 self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
             elif splitData[0] == "offer" and self.offer_thread.get_found_peer():
-                # id do peer
-                # monitor
+
                 sendstr="offer_rjct,"+splitData[1]
                 self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
             elif splitData[0] == "offer_rjct":
-                # id do peer
-                # monitor
+
                 self.offer_thread.ack(splitData[1])
             elif splitData[0] == "offer_res" and self.offer_thread.get_found_peer() == False:
-                # id do peer
-                # monitor
+
                 self.offer_thread.ack(splitData[1])
                 self.offer_thread.set_found_peer((splitData[1],"client"))
             elif splitData[0] == "offer_abort" and self.offer_thread.get_found_peer() and splitData[1] == self.offer_thread.get_found_peer():
-                #monitor
+
                 self.offer_thread.set_found_peer((False,"undefined"))
                 sendstr="offer_abort_ack," + splitData[1]
                 self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
