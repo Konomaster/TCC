@@ -617,11 +617,6 @@
              self.emit('startTest')
          })
      }
-     else if (splitMessage[0]==="endTest"){
-         console.log("reiniciandoBiblioteca")
-         self.setReady(true)
-         self.__dht.listen(Number(splitMessage[1]))
-     }
      else if (splitMessage[0]==="destroy"){
          console.log("destruindo dht")
          self.destroy()
@@ -631,7 +626,12 @@
          _sendIfReady(self,"vazao,"+splitMessage[2],splitMessage[1])
      }
      else if(splitMessage[0]==="endTest"){
-         _sendIfReady(self,"endTest",splitMessage[splitMessage.length-1])
+         if (splitMessage.length == 3){
+             _sendIfReady(self,"endTest,"+splitMessage[2],splitMessage[1])
+         }
+         else{
+            _sendIfReady(self,"endTest",splitMessage[1])
+         }
      }
      else if(splitMessage[0]==="endTest_ack"){
         _sendIfReady(self,"endTest_ack",splitMessage[splitMessage.length-1])

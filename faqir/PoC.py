@@ -183,10 +183,6 @@ class PoC:
 
 
     def tcp_test(self, direcao):
-        S_OUVIR = 1
-        S_TESTAR = 2
-        S_ENVIAR_RESULTADOS = 3
-        S_FINALIZAR = 5
 
         estado = 1
         max_retr = 3
@@ -286,6 +282,11 @@ class PoC:
 
         elif my_role is SERVER:
 
+            S_OUVIR = 1
+            S_TESTAR = 2
+            S_ENVIAR_RESULTADOS = 3
+            S_FINALIZAR = 5
+
             client_result = "0.00 B/s"
 
             while estado != S_FINALIZAR:
@@ -373,7 +374,7 @@ class PoC:
                     result_retr -= 1
 
                     # envia resultado ao par
-                    vazao = "vazao," + id_peer + "," + client_result
+                    vazao = "endTest," + id_peer + "," + client_result
                     self.s2.sendto(vazao.encode('utf-8'), ("0.0.0.0", 37711))
 
                     # timeout de 3 secs
@@ -750,9 +751,9 @@ class PoC:
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
                 print("achouPeer\n")
                 self.endTest = False
-                self.make_tcp_test("reverso")
+                self.tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
-                self.make_tcp_test("normal")
+                self.tcp_test("normal")
                 #print("indo pro teste udp normal")
                 #self.make_udp_test("reverso")
                 #print("indo pro teste udp reverso")
