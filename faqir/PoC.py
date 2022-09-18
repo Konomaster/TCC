@@ -322,15 +322,15 @@ class PoC:
                         continue
                     max_retr -= 1
 
-                    serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
-                    self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-
                     # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                     serverRunning = True
-                    # print("Servidor iniciando")
                     str1 = "nc -u -l " + str(self.udp_local_port)
                     str2 = "pv -f -r"
                     # "nc -u -l "+str(self.udp_local_port)+" | pv > /dev/null"
+
+                    serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
+                    self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+
                     t1 = Popen(str1.split(), stdout=PIPE)
                     t2 = Popen(str2.split(), stdin=t1.stdout, stderr=PIPE, stdout=DEVNULL)
                     t1.stdout.close()
