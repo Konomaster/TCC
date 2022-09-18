@@ -224,7 +224,7 @@ class PoC:
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
                     # esperar por tantos segundos o servidor falar que ja ta pronto
-                    for i in range(0, 16):
+                    for i in range(0, 28):
                         sleep(0.5)
                         if self.serverReady:
                             self.serverReady = False
@@ -273,6 +273,9 @@ class PoC:
                     for i in range(0, result_retr_timeout*result_retr + 1):
                         sleep(0.5)
                         if self.endTest:
+                            #recebeu resultado, envia ack
+                            sendstr = "endTest_ack," + self.offer_thread.get_found_peer()
+                            self.s2.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
                             self.testDone = True
                             break
 
@@ -299,7 +302,7 @@ class PoC:
                             self.gonnaTest = False
                             estado = S_TESTAR
                             break
-
+                    time1=datetime.now()
                     keep_tcp.stop()
                     keep_udp.stop()
                     keep_tcp.join()
@@ -314,7 +317,8 @@ class PoC:
 
                     socket_tcp.close()
                     socket_udp.close()
-
+                    elapsed_time = datetime.now() - time1
+                    print("elapsed time:\n"+str(elapsed_time)+"\n")
                 elif estado is S_TESTAR:
 
                     if max_retr == 0:
@@ -378,6 +382,7 @@ class PoC:
                     # timeout de 3 secs
                     for i in range(0,result_retr_timeout):
                         sleep(0.5)
+                        #recebeu ack
                         if self.endTest:
                             estado = S_FINALIZAR
                             self.testDone = True
@@ -755,10 +760,10 @@ class PoC:
                 #print("indo pro teste udp reverso")
                 #self.make_udp_test("normal")
                 #print("acabou todos os testes")
+                sleep(DELAY_BUSCA)
                 self.offer_thread.set_peers([])
                 self.offer_thread.set_found_peer((False,"undefined"))
                 print("found peer = False\n")
-                sleep(DELAY_BUSCA)
             #elif self.listaPares!=[] and self.hole_port1>0 and self.testDone and not self.test2Done:
             else:
                 print("ainda nao achou peer\n")
@@ -815,12 +820,9 @@ class PoC:
                 self.endTest=True
                 if len(splitData) == 3:
                     self.bits_per_sec_self = self.extract_throughput(splitData[1])
-                sendstr="endTest_ack,"+splitData[len(splitData)-1]
-                self.s1.sendto(sendstr.encode('utf-8'),  ("0.0.0.0", 37711))
             elif splitData[0] == "endTest_ack" and self.offer_thread.get_found_peer() == splitData[len(splitData)-1]:
                 self.endTest=True
             elif splitData[0] == "offer" and not self.offer_thread.get_found_peer():
-
                 self.offer_thread.set_found_peer((splitData[1],"server"))
                 sendstr="offer_res," + splitData[1]
                 self.s1.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
