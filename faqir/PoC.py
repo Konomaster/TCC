@@ -224,7 +224,7 @@ class PoC:
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
                     # esperar por tantos segundos o servidor falar que ja ta pronto
-                    for i in range(0, 10):
+                    for i in range(0, 16):
                         sleep(0.5)
                         if self.serverReady:
                             self.serverReady = False
