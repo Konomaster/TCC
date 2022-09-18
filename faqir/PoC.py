@@ -62,7 +62,6 @@ class PoC:
 
         self.offer_thread=PeerOfferThread(self.s2,NUM_RETRANSMISSOES,OFFER_TIMEOUT)
 
-
     def seleciona_par(self,direcao):
 
         ipPeer,idPeer="",""
@@ -181,8 +180,9 @@ class PoC:
 
         return result_string
 
-
     def tcp_test(self, direcao):
+
+        self.endTest = False
 
         estado = 1
         max_retr = 3
@@ -277,8 +277,6 @@ class PoC:
                             break
 
                     estado = C_FINALIZAR
-
-
 
         elif my_role is SERVER:
 
@@ -385,7 +383,6 @@ class PoC:
                             self.testDone = True
                             self.serverRunning = False
                             break
-
 
     def make_tcp_test(self,direcao):
 
@@ -750,7 +747,6 @@ class PoC:
          #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
                 print("achouPeer\n")
-                self.endTest = False
                 self.tcp_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.tcp_test("normal")
