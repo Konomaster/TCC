@@ -16,7 +16,7 @@ class PeerOfferThread(Thread):
         self.peers = [] #
         self.peers_ack = [] #
         self.num_rtr_original = num_rtr + 1
-        self.num_rtr = num_rtr +1
+        self.num_rtr = num_rtr + 1
         self.offers_sent = False
         self.offers_ended = True
 
