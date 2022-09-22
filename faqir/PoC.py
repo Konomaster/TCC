@@ -183,7 +183,7 @@ class PoC:
     def tcp_test(self, direcao):
 
         self.endTest = False
-
+        retorno = False
         estado = 1
         max_retr = 3
         result_retr = 3
@@ -192,17 +192,17 @@ class PoC:
         ip_peer, id_peer, my_role = self.seleciona_par(direcao)
 
         if ip_peer == "":
-            return
+            return retorno
 
         udp_hole, socket_udp, keep_udp = self.open_udp_hole()
         tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
 
         if udp_hole == -1 or tcp_hole == -1:
             # print("erro ao dar bind nos sockets do cliente")
-            return
+            return retorno
         elif udp_hole == -2 or tcp_hole == -2:
             # print("erro ao abrir buracos do cliente")
-            return
+            return retorno
 
         if my_role is CLIENT:
 
@@ -267,7 +267,9 @@ class PoC:
                         estado = C_INICIAR
 
                 if estado is C_RECEBER_RESULTADOS:
-
+                    #ignorar serverReadies duplos que vierem por qualquer motivo
+                    if self.serverReady:
+                        self.serverReady == False
                     #Tempo suficiente pra par fazer as retransmissoes de
                     #resultado e chegar para o cliente
                     for i in range(0, result_retr_timeout*result_retr + 1):
@@ -277,6 +279,7 @@ class PoC:
                             sendstr = "endTest_ack," + self.offer_thread.get_found_peer()
                             self.s2.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
                             self.testDone = True
+                            retorno = True
                             break
 
                     estado = C_FINALIZAR
@@ -387,7 +390,10 @@ class PoC:
                             estado = S_FINALIZAR
                             self.testDone = True
                             self.serverRunning = False
+                            retorno = True
                             break
+
+        return retorno
 
     def make_tcp_test(self,direcao):
 
