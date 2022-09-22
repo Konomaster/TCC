@@ -25,9 +25,6 @@ class PeerOfferThread(Thread):
     def keep_alive(self):
         while not self.stopped():
             # monitor
-            print("pares a comunicar\n")
-            print(self.peers)
-
             with lock:
                 if not self.offers_sent and not self.found_peer and self.peers != []:
                     self.offers_ended = False
@@ -49,7 +46,6 @@ class PeerOfferThread(Thread):
 
                     if self.num_rtr == 0:
                         self.offers_ended = True
-            print("num rtr:"+str(self.num_rtr))
             sleep(self.timeout)
 
     def kick_off(self):
