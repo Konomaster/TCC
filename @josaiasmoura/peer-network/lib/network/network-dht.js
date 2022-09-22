@@ -682,11 +682,11 @@
  function _preTestConfirmation(self,msg,peerId){
      let splitMessage=msg.split(',')
      if (splitMessage[0]==="serverReady" && splitMessage.length == 3){
-         _responseMessage(self,msg)
+         _responseMessage(self,msg+","+peerId)
      }
      //recebe o gonnaTest, manda pro python e ja fecha o socket
      else if(splitMessage[0]==="gonnaTest" && splitMessage.length == 3){
-         _responseMessage(self,msg)
+         _responseMessage(self,msg+","+peerId)
          self.emit("startTest")
  
      }

@@ -775,7 +775,6 @@ class PoC:
                 print("ainda nao achou peer\n")
             sleep(5)
 
-
     def listen(self):
         if self.porta_udp>0:
             try:
@@ -812,11 +811,11 @@ class PoC:
             #    self.notPinged=True
             #elif splitData[0]=="removeNotPing":
             #    self.notPinged=False
-            elif splitData[0]=="serverReady":
+            elif splitData[0]=="serverReady" and self.offer_thread.get_found_peer() == splitData[3]:
                 self.serverReady=True
                 self.server_udp_hole=int(splitData[1])
                 self.server_tcp_hole=int(splitData[2])
-            elif splitData[0]=="gonnaTest":
+            elif splitData[0]=="gonnaTest" and self.offer_thread.get_found_peer() == splitData[3]:
                 self.gonnaTest=True
                 self.client_udp_hole=int(splitData[1])
                 self.client_tcp_hole=int(splitData[2])
