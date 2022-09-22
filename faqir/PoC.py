@@ -223,8 +223,8 @@ class PoC:
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
-                    # esperar por tantos segundos o servidor falar que ja ta pronto
-                    for i in range(0, 28):
+                    # esperar por tantos segundos o servidor falar que ja ta pronto (28)
+                    for i in range(0, 32):
                         sleep(0.5)
                         if self.serverReady:
                             self.serverReady = False
@@ -269,7 +269,7 @@ class PoC:
                 if estado is C_RECEBER_RESULTADOS:
                     #ignorar serverReadies duplos que vierem por qualquer motivo
                     if self.serverReady:
-                        self.serverReady == False
+                        self.serverReady = False
                     #Tempo suficiente pra par fazer as retransmissoes de
                     #resultado e chegar para o cliente
                     for i in range(0, result_retr_timeout*result_retr + 1):
