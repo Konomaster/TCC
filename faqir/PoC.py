@@ -570,7 +570,6 @@ class PoC:
                     socket_tcp.close()
                     socket_udp.close()
                     elapsed_time = datetime.now() - time1
-                    print("elapsed time:\n"+str(elapsed_time)+"\n")
                 elif estado is S_TESTAR:
 
                     if max_retr == 0:
@@ -580,13 +579,16 @@ class PoC:
 
                     cmd = "socat -d -d udp-listen:" + str(self.tcp_local_port) + ",reuseaddr tcp:localhost:" + str(
                         self.udp_local_port)
-                    # print(cmd)
+                    cmdserver = "iperf3 -1 -s -p " + str(self.udp_local_port)
+
+                    serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
+                    self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
+
                     # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                     tunnelTCP_UDP = Popen(cmd.split())
 
                     serverRunning = True
                     # print("Servidor iniciando")
-                    cmdserver = "iperf3 -1 -s -p " + str(self.udp_local_port)
                     s = Popen(cmdserver.split())
 
                     retry = False
