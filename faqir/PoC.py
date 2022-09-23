@@ -926,7 +926,7 @@ class PoC:
                     # hole punch eh udp
                     c.protocol = 'tcp'
                     # deixar iperf determinar o tamanho do bloco
-                    # c.blksize = 0
+                    c.blksize = 1300
 
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
