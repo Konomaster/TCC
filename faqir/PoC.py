@@ -1050,10 +1050,10 @@ class PoC:
                         continue
                     max_retr -= 1
 
-                    cmd = "socat -d -d -b 1400 udp-listen:" + str(self.tcp_local_port) + ",reuseaddr tcp:localhost:" + str(
-                        self.udp_local_port + 10)
-                    cmd2 = "socat -d -d -b 1400 udp-listen:" + str(self.udp_local_port) + ",reuseaddr tcp:localhost:" + str(
-                        self.udp_local_port + 10)
+                    cmd = "socat -d -d -b 1400 -t 3 udp-listen:" + str(self.tcp_local_port) + ",fork tcp:localhost:" + str(
+                        self.udp_local_port + 10)+"sp=9001"
+                    cmd2 = "socat -d -d -b 1400 -t 3 udp-listen:" + str(self.udp_local_port) + ",fork tcp:localhost:" + str(
+                        self.udp_local_port + 10)+"sp=9000"
                     cmdserver = "iperf3 -1 -s -p " + str(self.udp_local_port + 10)
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
