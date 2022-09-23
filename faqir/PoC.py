@@ -962,29 +962,31 @@ class PoC:
                         self.iperf_port) + ",reuseaddr,reuseport udp:" + ip_peer + ":" + str(
                         self.server_udp_hole) + ",sp=" + str(self.udp_local_port)
 
+                    cmd3 = "iperf3 -c localhost -p " + str(self.iperf_port) + "-l 1400"
                     tunnelTCP_UDP = Popen(cmd.split())
                     tunnelTCP_UDP2 = Popen(cmd2.split())
+                    piperf3 = Popen(cmd3.split())
                     result = ""
                     try:
 
                         # print("cliente iniciando teste")
-                        result = c.run()
-
+                        sleep(12)
+                        result=piperf3.stdout
                     except:
                         print('exception no teste (cliente)')
                         estado = C_INICIAR
 
-                    if result != "" or result != None:
-                        if result.error:
-                            print("result error: " + result.error)
-                            estado = C_INICIAR
-                        else:
-                            self.extract_latency(result)
+                    #if result != "" or result != None:
+                    #    if result.error:
+                    #        print("result error: " + result.error)
+                    #        estado = C_INICIAR
+                    #    else:
+                    #        self.extract_latency(result)
                             # print("teste concluido com sucesso")
 
-                            estado = C_RECEBER_RESULTADOS
+                    #        estado = C_RECEBER_RESULTADOS
                     # fecha os tuneis
-                    self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid])
+                    self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid,piperf3.pid])
                     self.server_udp_hole = 0
                     self.server_udp_hole = 0
 
