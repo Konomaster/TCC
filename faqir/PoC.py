@@ -324,7 +324,6 @@ class PoC:
                     socket_tcp.close()
                     socket_udp.close()
                     elapsed_time = datetime.now() - time1
-                    print("elapsed time:\n"+str(elapsed_time)+"\n")
                 elif estado is S_TESTAR:
 
                     if max_retr == 0:
@@ -915,7 +914,7 @@ class PoC:
                 self.throughput_test("reverso")
                 #print("indo pro teste tcp reverso")
                 self.throughput_test("normal")
-                self.latency_test("revereso")
+                self.latency_test("reverso")
                 self.latency_test("normal")
                 #print("indo pro teste udp normal")
                 self.metrics_test("reverso")
