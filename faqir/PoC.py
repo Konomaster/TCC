@@ -744,14 +744,11 @@ class PoC:
                         else:
                             self.extract_latency(result)
                             # print("teste concluido com sucesso")
-
-
                             estado = C_RECEBER_RESULTADOS
                     # fecha os tuneis
                     self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid])
                     self.server_udp_hole = 0
                     self.server_udp_hole = 0
-
 
                 if estado is C_RECEBER_RESULTADOS:
                     #ignorar serverReadies duplos que vierem por qualquer motivo
@@ -878,241 +875,6 @@ class PoC:
 
         return retorno
 
-    def t_test(self, direcao):
-
-        self.endTest = False
-        retorno = False
-        estado = 1
-        max_retr = 3
-        result_retr = 3
-        result_retr_timeout = 6  # 3 segundos porcausa do sleep de 0.5
-
-        ip_peer, id_peer, my_role = self.seleciona_par(direcao)
-
-        if ip_peer == "":
-            return retorno
-
-        udp_hole, socket_udp, keep_udp = self.open_udp_hole()
-        tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
-
-        if udp_hole == -1 or tcp_hole == -1:
-            # print("erro ao dar bind nos sockets do cliente")
-            return retorno
-        elif udp_hole == -2 or tcp_hole == -2:
-            # print("erro ao abrir buracos do cliente")
-            return retorno
-
-        if my_role is CLIENT:
-
-            c = iperf3.Client()
-
-            C_INICIAR = 1
-            C_TESTAR = 2
-            C_RECEBER_RESULTADOS = 3
-            C_FINALIZAR = 5
-
-            while estado != C_FINALIZAR:
-
-                if estado is C_INICIAR:
-
-                    if max_retr == 0:
-                        estado = C_FINALIZAR
-                        continue
-                    max_retr -= 1
-
-                    c = iperf3.Client()
-                    c.server_hostname = "localhost"
-                    c.port = self.iperf_port
-                    # hole punch eh udp
-                    c.protocol = 'tcp'
-                    # deixar iperf determinar o tamanho do bloco
-                    c.blksize = 1300
-
-                    gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
-                    self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
-
-                    # esperar por tantos segundos o servidor falar que ja ta pronto (28)
-                    for i in range(0, 32):
-                        sleep(0.5)
-                        if self.serverReady:
-                            self.serverReady = False
-                            estado = C_TESTAR
-                            break
-
-                    keep_tcp.stop()
-                    keep_udp.stop()
-                    keep_tcp.join()
-                    keep_udp.join()
-                    socket_tcp.close()
-                    socket_udp.close()
-
-                if estado is C_TESTAR:
-
-                    if self.server_udp_hole == 0 or self.server_udp_hole == 0:
-                        # print("nao foram recebidos buracos do servidor")
-                        estado = C_FINALIZAR
-                        continue
-
-                    sleep(1)
-
-                    cmd = "socat -d -d -b 1400 tcp-listen:" + str(
-                        self.iperf_port) + ",reuseaddr,reuseport udp:" + ip_peer + ":" + str(
-                        self.server_tcp_hole) + ",sp=" + str(self.tcp_local_port)
-                    cmd2 = "socat -d -d -b 1400 tcp-listen:" + str(
-                        self.iperf_port) + ",reuseaddr,reuseport udp:" + ip_peer + ":" + str(
-                        self.server_udp_hole) + ",sp=" + str(self.udp_local_port)
-
-                    cmd3 = "iperf3 -c localhost -p " + str(self.iperf_port) + "-l 1400"
-                    tunnelTCP_UDP = Popen(cmd.split())
-                    tunnelTCP_UDP2 = Popen(cmd2.split())
-                    piperf3 = Popen(cmd3.split())
-                    result = ""
-                    try:
-
-                        # print("cliente iniciando teste")
-                        sleep(12)
-                        result=piperf3.stdout
-                    except:
-                        print('exception no teste (cliente)')
-                        estado = C_INICIAR
-
-                    #if result != "" or result != None:
-                    #    if result.error:
-                    #        print("result error: " + result.error)
-                    #        estado = C_INICIAR
-                    #    else:
-                    #        self.extract_latency(result)
-                            # print("teste concluido com sucesso")
-
-                    #        estado = C_RECEBER_RESULTADOS
-                    # fecha os tuneis
-                    self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid,piperf3.pid])
-                    self.server_udp_hole = 0
-                    self.server_udp_hole = 0
-
-                if estado is C_RECEBER_RESULTADOS:
-                    # ignorar serverReadies duplos que vierem por qualquer motivo
-                    if self.serverReady:
-                        self.serverReady = False
-                    # Tempo suficiente pra par fazer as retransmissoes de
-                    # resultado e chegar para o cliente
-                    for i in range(0, result_retr_timeout * result_retr + 1):
-                        sleep(0.5)
-                        if self.endTest:
-                            # recebeu resultado, envia ack
-                            sendstr = "endTest_ack," + self.offer_thread.get_found_peer()
-                            self.s2.sendto(sendstr.encode('utf-8'), ("0.0.0.0", 37711))
-
-                            retorno = True
-                            break
-
-                    estado = C_FINALIZAR
-
-        elif my_role is SERVER:
-
-            S_OUVIR = 1
-            S_TESTAR = 2
-            S_ENVIAR_RESULTADOS = 3
-            S_FINALIZAR = 5
-
-            client_result = "0.00 B/s"
-
-            while estado != S_FINALIZAR:
-
-                if estado is S_OUVIR:
-
-                    estado = S_FINALIZAR
-
-                    for i in range(0, 40):
-                        sleep(0.5)
-                        if self.gonnaTest:
-                            self.gonnaTest = False
-                            estado = S_TESTAR
-                            break
-                    time1 = datetime.now()
-                    keep_tcp.stop()
-                    keep_udp.stop()
-                    keep_tcp.join()
-                    keep_udp.join()
-
-                    if self.client_udp_hole != 0 and self.client_tcp_hole != 0:
-                        # print("furando buracos para peer ip: "+ipPeer)
-                        socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.client_tcp_hole))
-                        socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ip_peer, self.client_udp_hole))
-                        # make sure client doesnt get above messages
-                        sleep(3)
-
-                    socket_tcp.close()
-                    socket_udp.close()
-                    elapsed_time = datetime.now() - time1
-                elif estado is S_TESTAR:
-
-                    if max_retr == 0:
-                        estado = S_FINALIZAR
-                        continue
-                    max_retr -= 1
-
-                    cmd = "socat -d -d -b 1400 -t 3 udp-listen:" + str(self.tcp_local_port) + ",fork tcp:localhost:" + str(
-                        self.udp_local_port + 10)+"sp=9001"
-                    cmd2 = "socat -d -d -b 1400 -t 3 udp-listen:" + str(self.udp_local_port) + ",fork tcp:localhost:" + str(
-                        self.udp_local_port + 10)+"sp=9000"
-                    cmdserver = "iperf3 -1 -s -p " + str(self.udp_local_port + 10)
-
-                    serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
-                    self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-
-                    # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
-                    tunnelTCP_UDP = Popen(cmd.split())
-                    tunnelTCP_UDP2 = Popen(cmd2.split())
-
-                    serverRunning = True
-                    # print("Servidor iniciando")
-                    s = Popen(cmdserver.split())
-
-                    retry = False
-                    for i in range(0, 15):
-                        sleep(1)
-                        if self.gonnaTest:
-                            self.gonnaTest = False
-                            retry = True
-                            break
-
-                    self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid, s.pid])
-
-                    if retry:
-                        continue
-
-                    # fecha o tunel
-                    self.serverRunning = False
-
-                    self.client_udp_hole = 0
-                    self.client_tcp_hole = 0
-
-                    estado = S_ENVIAR_RESULTADOS
-
-                elif estado is S_ENVIAR_RESULTADOS:
-
-                    # somente num_retr tentativas de mandar resultado
-                    if result_retr == 0:
-                        estado = S_FINALIZAR
-                        continue
-                    result_retr -= 1
-
-                    # envia resultado ao par
-                    vazao = "endTest," + id_peer
-                    self.s2.sendto(vazao.encode('utf-8'), ("0.0.0.0", 37711))
-
-                    # timeout de 3 secs
-                    for i in range(0, result_retr_timeout):
-                        sleep(0.5)
-                        # recebeu ack
-                        if self.endTest:
-                            estado = S_FINALIZAR
-                            self.serverRunning = False
-                            retorno = True
-                            break
-
-        return retorno
 
     def select_peer(self):
         if not self.offer_thread.is_kicked_off() and self.listaPares and self.public_address != "":
@@ -1150,9 +912,11 @@ class PoC:
             self.select_peer()
          #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
-                self.t_test("reverso")
+                self.throughput_test("reverso")
                 #print("indo pro teste tcp reverso")
-                self.t_test("normal")
+                self.throughput_test("normal")
+                self.latency_test("revereso")
+                self.latency_test("normal")
                 #print("indo pro teste udp normal")
                 self.metrics_test("reverso")
                 #print("indo pro teste udp reverso")
