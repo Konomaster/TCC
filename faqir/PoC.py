@@ -809,7 +809,7 @@ class PoC:
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-
+                    sleep(3)
                     serverRunning = True
                     # print("Servidor iniciando")
                     tunnelVinda = Popen(cmd.split())
