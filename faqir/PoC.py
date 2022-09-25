@@ -814,7 +814,7 @@ class PoC:
                     # print("Servidor iniciando")
                     tunnelVinda = Popen(cmd.split())
                     tunnelVolta = Popen(cmd2.split())
-                    s = Popen(cmdserver.split,shell=True)
+                    s = Popen(cmdserver,shell=True)
 
                     retry = False
                     for i in range(0,15):
