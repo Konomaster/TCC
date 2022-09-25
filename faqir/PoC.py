@@ -698,7 +698,7 @@ class PoC:
                     keep_tcp.join()
                     keep_udp.join()
                     socket_tcp.sendto("abrindo buraco tcp da volta".encode('utf-8'), (ip_peer, self.server_tcp_hole))
-                    socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
+                    #socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
                     socket_tcp.close()
                     socket_udp.close()
 
@@ -805,7 +805,7 @@ class PoC:
                         self.client_tcp_hole) + ",sp=" + str(self.tcp_local_port)
 
                     #cmdserver = "python3 ../ultra_ping/echo.py --server --listen_port " + str(self.iperf_port)
-                    cmdserver = "nc -u localhost 5001"
+                    cmdserver = "echo 'oi' | nc -u localhost 5001"
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
@@ -814,7 +814,7 @@ class PoC:
                     # print("Servidor iniciando")
                     tunnelVinda = Popen(cmd.split())
                     tunnelVolta = Popen(cmd2.split())
-                    s = Popen(cmdserver.split())
+                    s = Popen(cmdserver.split,shell=True)
 
                     retry = False
                     for i in range(0,15):
