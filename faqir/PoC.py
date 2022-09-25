@@ -709,7 +709,7 @@ class PoC:
 
                     sleep(1)
                     exception = False
-                    cmdclient = "python3 ../ultra_ping/echo.py --client --listen_port "+str(self.udp_local_port)
+                    cmdclient = "python3 ../ultra_ping/echo.py --client " + ip_peer + " --listen_port "+str(self.udp_local_port)
                     client_exec = Popen(cmdclient.split())
                     try:
                         client_exec.wait(10)
