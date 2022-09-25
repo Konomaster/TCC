@@ -709,7 +709,16 @@ class PoC:
 
                     sleep(1)
                     exception = False
-                    cmdclient = "python3 ../ultra_ping/echo.py --client " + ip_peer + " --listen_port "+str(self.udp_local_port)
+
+                    cmd1 = "socat -d -d udp-listen:" + str(self.iperf_port) + ",reuseaddr udp:"+ ip_peer +":" + str(
+                        self.client_udp_hole)+",sp="+self.udp_local_port
+
+                    cmd2 = "socat -d -d udp-listen:" + str(
+                        self.tcp_local_port) + ",reuseaddr udp:localhost:" + str(self.iperf_port + 1)
+                    cmdclient = "python3 ../ultra_ping/echo.py --client 127.0.0.1 --listen_port "+str(self.iperf_port)
+
+                    tunnelIda = Popen(cmd1.split())
+                    tunnelVolta = Popen(cmd2.split())
                     client_exec = Popen(cmdclient.split())
                     try:
                         client_exec.wait(10)
@@ -721,7 +730,7 @@ class PoC:
                     if not exception:
                             estado = C_RECEBER_RESULTADOS
                     # fecha os tuneis
-                    self.close_processes([client_exec.pid])
+                    self.close_processes([tunnelIda.pid, tunnelVolta.pid, client_exec.pid])
                     self.server_udp_hole = 0
                     self.server_udp_hole = 0
 
@@ -787,14 +796,20 @@ class PoC:
                         continue
                     max_retr -= 1
 
+                    cmd = "socat -d -d udp-listen:" + str(self.udp_local_port) + ",reuseaddr udp:localhost:" + str(
+                        self.iperf_port)
+                    cmd2 = "socat -d -d udp-listen:"+ str(self.iperf_port + 1) +",reuseaddr udp:" + ip_peer + ":" + str(
+                        self.client_tcp_hole) + ",sp=" + str(self.tcp_local_port)
 
-                    cmdserver = "python3 ../ultra_ping/echo.py --server --listen_port "+ str(self.udp_local_port)
+                    cmdserver = "python3 ../ultra_ping/echo.py --server --listen_port " + str(self.iperf_port)
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
 
                     serverRunning = True
                     # print("Servidor iniciando")
+                    tunnelVinda = Popen(cmd.split())
+                    tunnelIda = Popen(cmd2.split)
                     s = Popen(cmdserver.split())
 
                     retry = False
@@ -805,7 +820,7 @@ class PoC:
                             retry = True
                             break
 
-                    self.close_processes([s.pid])
+                    self.close_processes([tunnelVinda.pid, tunnelIda.pid, s.pid])
 
                     if retry:
                         continue
@@ -879,15 +894,15 @@ class PoC:
             self.select_peer()
          #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
-                self.throughput_test("reverso")
+                #self.throughput_test("reverso")
                 #print("indo pro teste tcp reverso")
-                self.throughput_test("normal")
+                #self.throughput_test("normal")
                 self.latency_test("reverso")
                 self.latency_test("normal")
                 #print("indo pro teste udp normal")
-                self.metrics_test("reverso")
+                #self.metrics_test("reverso")
                 #print("indo pro teste udp reverso")
-                self.metrics_test("normal")
+                #self.metrics_test("normal")
                 #print("acabou todos os testes")
                 sleep(DELAY_BUSCA)
                 self.offer_thread.set_peers([])

@@ -27,8 +27,8 @@ class Measurement:
 
         sock_out = \
             socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        sock_out.bind(("0.0.0.0", target_address[1]))
         sock_out.connect(target_address)
+        
         cls.pre_send(n_packets, sock_out)
 
         print("Sending %d %d-byte packets at about %d kB/s to %s:%d..." %

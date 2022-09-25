@@ -57,7 +57,7 @@ latencies of each packet received back from the server."""
 
         sock_out = \
             socket.socket(socket.AF_INET, socket.SOCK_DGRAM, socket.IPPROTO_UDP)
-        sock_out.bind(("0.0.0.0", listen_port + 1 ))
+            
         print("UDP server running...")
 
         while True:
