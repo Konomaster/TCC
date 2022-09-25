@@ -728,7 +728,8 @@ class PoC:
                     tunnelVolta = Popen(cmd2.split())
                     client_exec = Popen(cmdclient.split())
                     try:
-                        client_exec.wait(10)
+                        sleep(10)
+                        #client_exec.wait(10)
                     except:
                         print('exception no teste (cliente)')
                         exception = True
