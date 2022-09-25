@@ -711,7 +711,7 @@ class PoC:
                     exception = False
 
                     cmd1 = "socat -d -d udp-listen:" + str(self.iperf_port) + ",reuseaddr udp:"+ ip_peer +":" + str(
-                        self.client_udp_hole)+",sp="+str(self.udp_local_port)
+                        self.server_udp_hole)+",sp="+str(self.udp_local_port)
 
                     cmd2 = "socat -d -d udp-listen:" + str(
                         self.tcp_local_port) + ",reuseaddr udp:localhost:" + str(self.iperf_port + 1)
