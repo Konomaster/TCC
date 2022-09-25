@@ -697,7 +697,8 @@ class PoC:
                     keep_udp.stop()
                     keep_tcp.join()
                     keep_udp.join()
-                    socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.server_tcp_hole))
+                    socket_tcp.sendto("abrindo buraco tcp da volta".encode('utf-8'), (ip_peer, self.server_tcp_hole))
+                    socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
                     socket_tcp.close()
                     socket_udp.close()
 
@@ -716,7 +717,8 @@ class PoC:
 
                     cmd2 = "socat -d -d udp-listen:" + str(
                         self.tcp_local_port) + ",reuseaddr udp:localhost:" + str(self.iperf_port + 1)
-                    cmdclient = "python3 ../ultra_ping/echo.py --client 127.0.0.1 --listen_port "+str(self.iperf_port)
+                    #cmdclient = "python3 ../ultra_ping/echo.py --client 127.0.0.1 --listen_port "+str(self.iperf_port)
+                    cmdclient = "nc -u -l 5001"
 
                     tunnelIda = Popen(cmd1.split())
                     tunnelVolta = Popen(cmd2.split())
@@ -802,7 +804,8 @@ class PoC:
                     cmd2 = "socat -d -d udp-listen:"+ str(self.iperf_port + 1) +",reuseaddr udp:" + ip_peer + ":" + str(
                         self.client_tcp_hole) + ",sp=" + str(self.tcp_local_port)
 
-                    cmdserver = "python3 ../ultra_ping/echo.py --server --listen_port " + str(self.iperf_port)
+                    #cmdserver = "python3 ../ultra_ping/echo.py --server --listen_port " + str(self.iperf_port)
+                    cmdserver = "nc -u localhost 5001"
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
@@ -810,7 +813,7 @@ class PoC:
                     serverRunning = True
                     # print("Servidor iniciando")
                     tunnelVinda = Popen(cmd.split())
-                    tunnelIda = Popen(cmd2.split())
+                    tunnelVolta = Popen(cmd2.split())
                     s = Popen(cmdserver.split())
 
                     retry = False
@@ -821,7 +824,7 @@ class PoC:
                             retry = True
                             break
 
-                    self.close_processes([tunnelVinda.pid, tunnelIda.pid, s.pid])
+                    self.close_processes([tunnelVinda.pid, tunnelVolta.pid, s.pid])
 
                     if retry:
                         continue
