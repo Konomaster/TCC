@@ -243,7 +243,7 @@ class PoC:
 
                 if estado is C_TESTAR:
 
-                    if self.server_udp_hole == 0 or self.server_udp_hole == 0:
+                    if self.server_udp_hole == 0 or self.server_tcp_hole == 0:
                         # print("nao foram recebidos buracos do servidor")
                         estado = C_FINALIZAR
                         continue
@@ -476,7 +476,7 @@ class PoC:
 
                 if estado is C_TESTAR:
 
-                    if self.server_udp_hole == 0 or self.server_udp_hole == 0:
+                    if self.server_udp_hole == 0 or self.server_tcp_hole == 0:
                         # print("nao foram recebidos buracos do servidor")
                         estado = C_FINALIZAR
                         continue
@@ -697,12 +697,13 @@ class PoC:
                     keep_udp.stop()
                     keep_tcp.join()
                     keep_udp.join()
+                    socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.server_tcp_hole))
                     socket_tcp.close()
                     socket_udp.close()
 
                 if estado is C_TESTAR:
 
-                    if self.server_udp_hole == 0 or self.server_udp_hole == 0:
+                    if self.server_udp_hole == 0 or self.server_tcp_hole == 0:
                         # print("nao foram recebidos buracos do servidor")
                         estado = C_FINALIZAR
                         continue
