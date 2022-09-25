@@ -682,16 +682,6 @@ class PoC:
                     max_retr -= 1
 
 
-                    c = iperf3.Client()
-                    c.server_hostname = "localhost"
-                    c.port = self.iperf_port
-                    # hole punch eh udp
-                    c.protocol = 'tcp'
-                    # deixar iperf determinar o tamanho do bloco
-                    c.blksize = 1000
-                    c.bandwidth = 10000
-
-
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
@@ -718,34 +708,20 @@ class PoC:
                         continue
 
                     sleep(1)
-
-                    cmd = "socat -d -d tcp-listen:" + str(self.iperf_port) + ",reuseaddr,reuseport udp:" + ip_peer + ":" + str(
-                        self.server_tcp_hole) + ",sp=" + str(self.tcp_local_port)
-                    cmd2 = "socat -d -d tcp-listen:" + str(self.iperf_port) + ",reuseaddr,reuseport udp:" + ip_peer + ":" + str(
-                        self.server_udp_hole) + ",sp=" + str(self.udp_local_port)
-
-                    tunnelTCP_UDP = Popen(cmd.split())
-                    tunnelTCP_UDP2 = Popen(cmd2.split())
-                    result = ""
+                    exception = False
+                    cmdclient = "python3 ../ultra_ping/echo.py --client --listen_port "+str(self.udp_local_port)
+                    client_exec = Popen(cmdclient.split())
                     try:
-
-                        # print("cliente iniciando teste")
-                        result = c.run()
-
+                        client_exec.wait(10)
                     except:
                         print('exception no teste (cliente)')
+                        exception = True
                         estado = C_INICIAR
 
-                    if result != "" or result != None:
-                        if result.error:
-                            print("result error: " + result.error)
-                            estado = C_INICIAR
-                        else:
-                            self.extract_latency(result)
-                            # print("teste concluido com sucesso")
+                    if not exception:
                             estado = C_RECEBER_RESULTADOS
                     # fecha os tuneis
-                    self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid])
+                    self.close_processes([client_exec.pid])
                     self.server_udp_hole = 0
                     self.server_udp_hole = 0
 
@@ -811,18 +787,11 @@ class PoC:
                         continue
                     max_retr -= 1
 
-                    cmd = "socat -d -d udp-listen:" + str(self.tcp_local_port) + ",reuseaddr tcp:localhost:" + str(
-                        self.udp_local_port+10)
-                    cmd2 = "socat -d -d udp-listen:" + str(self.udp_local_port) + ",reuseaddr tcp:localhost:" + str(
-                        self.udp_local_port+10)
-                    cmdserver = "iperf3 -1 -s -p " + str(self.udp_local_port+10)
+
+                    cmdserver = "python3 ../ultra_ping/echo.py --server --listen_port "+ str(self.udp_local_port)
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-
-                    # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
-                    tunnelTCP_UDP = Popen(cmd.split())
-                    tunnelTCP_UDP2 = Popen(cmd2.split())
 
                     serverRunning = True
                     # print("Servidor iniciando")
@@ -836,7 +805,7 @@ class PoC:
                             retry = True
                             break
 
-                    self.close_processes([tunnelTCP_UDP.pid, tunnelTCP_UDP2.pid,s.pid])
+                    self.close_processes([s.pid])
 
                     if retry:
                         continue
@@ -873,7 +842,6 @@ class PoC:
                             break
 
         return retorno
-
 
     def select_peer(self):
         if not self.offer_thread.is_kicked_off() and self.listaPares and self.public_address != "":
