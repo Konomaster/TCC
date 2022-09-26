@@ -52,8 +52,8 @@ class PoC:
         self.client_udp_hole=0
         self.client_tcp_hole=0
         self.iperf_port=5000
-        self.udp_local_port=2000
-        self.tcp_local_port=2001
+        self.udp_local_port=3000
+        self.tcp_local_port=3001
         self.bits_per_sec_sender=0
         self.bits_per_sec_self=0
         self.bits_per_sec_peer=0
@@ -662,10 +662,9 @@ class PoC:
         elif udp_hole == -2 or tcp_hole == -2:
             # print("erro ao abrir buracos do cliente")
             return retorno
+        hole_to_receive=""
 
         if my_role is CLIENT:
-
-            c = iperf3.Client()
 
             C_INICIAR = 1
             C_TESTAR = 2
@@ -699,9 +698,13 @@ class PoC:
                     keep_udp.join()
                     if max_retr == 2:
                         socket_tcp.sendto("abrindo buraco tcp da volta".encode('utf-8'), (ip_peer, self.server_tcp_hole))
-                        socket_tcp.sendto("abrindo buraco tcp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
-                        socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
-                        socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_tcp_hole))
+                        porta_aberta = open_hole(self.tcp_local_port)
+                        print("porta aberta: "+str(porta_aberta))
+                        #socket_tcp.sendto("abrindo buraco tcp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
+                        #socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_udp_hole))
+                        #socket_udp.sendto("abrindo buraco udp da volta".encode('utf-8'), (ip_peer, self.server_tcp_hole))
+                        hole_to_receive = datetime.now()
+                        #print("HOLE_FUROU "+str(hole_to_receive))
                     socket_tcp.close()
                     socket_udp.close()
 
@@ -726,7 +729,9 @@ class PoC:
                     #print(str(t_hole))
                     tunnelIda = Popen(cmd1.split())
                     tunnelVolta = Popen(cmd2.split())
+                    #print("TUNEL CRIADO "+str(datetime.now()))
                     client_exec = Popen(cmdclient.split())
+                    #print(str(datetime.now()-hole_to_receive))
                     try:
                         sleep(10)
                         #client_exec.wait(10)
@@ -814,7 +819,7 @@ class PoC:
 
                     serverString = "serverReady," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(serverString.encode('utf-8'), ("0.0.0.0", 37711))
-                    sleep(5)
+                    sleep(3)
                     serverRunning = True
                     # print("Servidor iniciando")
                     tunnelVinda = Popen(cmd.split())
@@ -906,8 +911,10 @@ class PoC:
                 #self.throughput_test("reverso")
                 #print("indo pro teste tcp reverso")
                 #self.throughput_test("normal")
+                self.latency_test("reverso")
                 self.latency_test("normal")
                 self.latency_test("reverso")
+                self.latency_test("normal")
                 #print("indo pro teste udp normal")
                 #self.metrics_test("reverso")
                 #print("indo pro teste udp reverso")
