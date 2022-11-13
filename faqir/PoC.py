@@ -428,16 +428,6 @@ class PoC:
         if ip_peer == "":
             return retorno
 
-        udp_hole, socket_udp, keep_udp = self.open_udp_hole()
-        tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
-
-        if udp_hole == -1 or tcp_hole == -1:
-            # print("erro ao dar bind nos sockets do cliente")
-            return retorno
-        elif udp_hole == -2 or tcp_hole == -2:
-            # print("erro ao abrir buracos do cliente")
-            return retorno
-
         if my_role is CLIENT:
 
             c = iperf3.Client()
@@ -455,6 +445,18 @@ class PoC:
                         estado = C_FINALIZAR
                         continue
                     max_retr -= 1
+
+                    udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+                    tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+                    if udp_hole == -1 or tcp_hole == -1:
+                        # print("erro ao dar bind nos sockets do cliente")
+                        estado = C_FINALIZAR
+                        continue
+                    elif udp_hole == -2 or tcp_hole == -2:
+                        # print("erro ao abrir buracos do cliente")
+                        estado = C_FINALIZAR
+                        continue
 
                     c = iperf3.Client()
                     c.server_hostname = "localhost"
@@ -568,6 +570,27 @@ class PoC:
                             self.gonnaTest = False
                             estado = S_TESTAR
                             break
+
+                elif estado is S_TESTAR:
+
+                    if max_retr == 0:
+                        estado = S_FINALIZAR
+                        continue
+                    max_retr -= 1
+
+                    #abre buracos por onde o cliente ira realizar o teste
+                    udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+                    tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+                    if udp_hole == -1 or tcp_hole == -1:
+                        # print("erro ao dar bind nos sockets do cliente")
+                        estado = S_FINALIZAR
+                        continue
+                    elif udp_hole == -2 or tcp_hole == -2:
+                        # print("erro ao abrir buracos do cliente")
+                        estado = S_FINALIZAR
+                        continue
+
                     time1 = datetime.now()
                     keep_tcp.stop()
                     keep_udp.stop()
@@ -584,12 +607,6 @@ class PoC:
                     socket_tcp.close()
                     socket_udp.close()
                     elapsed_time = datetime.now() - time1
-                elif estado is S_TESTAR:
-
-                    if max_retr == 0:
-                        estado = S_FINALIZAR
-                        continue
-                    max_retr -= 1
 
                     cmd = "socat -d -d udp-listen:" + str(self.tcp_local_port) + ",reuseaddr tcp:localhost:" + str(
                         self.udp_local_port)
@@ -847,7 +864,7 @@ class PoC:
                     s = Popen(cmdserver.split())
 
                     retry = False
-                    for i in range(0, 10):
+                    for i in range(0, 12):
                         sleep(1)
                         if self.gonnaTest:
                             self.gonnaTest = False
@@ -927,16 +944,15 @@ class PoC:
             self.select_peer()
             #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
-                # self.throughput_test("reverso")
-                # print("indo pro teste tcp reverso")
-                # self.throughput_test("normal")
+                self.throughput_test("normal")
+                self.throughput_test("reverso")
+                print("indo pro teste de jitter e perda")
+                self.metrics_test("normal")
+                self.metrics_test("reverso")
+                print("indo pro teste udp reverso")
                 self.latency_test("normal")
                 self.latency_test("reverso")
-                # print("indo pro teste udp normal")
-                # self.metrics_test("reverso")
-                # print("indo pro teste udp reverso")
-                # self.metrics_test("normal")
-                # print("acabou todos os testes")
+                print("acabou todos os testes")
                 sleep(DELAY_BUSCA)
                 self.offer_thread.set_peers([])
                 self.offer_thread.set_found_peer((False, "undefined"))
