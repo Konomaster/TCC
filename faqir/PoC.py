@@ -197,16 +197,6 @@ class PoC:
         if ip_peer == "":
             return retorno
 
-        udp_hole, socket_udp, keep_udp = self.open_udp_hole()
-        tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
-
-        if udp_hole == -1 or tcp_hole == -1:
-            # print("erro ao dar bind nos sockets do cliente")
-            return retorno
-        elif udp_hole == -2 or tcp_hole == -2:
-            # print("erro ao abrir buracos do cliente")
-            return retorno
-
         if my_role is CLIENT:
 
             C_INICIAR = 1
@@ -222,6 +212,18 @@ class PoC:
                         estado = C_FINALIZAR
                         continue
                     max_retr -= 1
+
+                    udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+                    tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+                    if udp_hole == -1 or tcp_hole == -1:
+                        # print("erro ao dar bind nos sockets do cliente")
+                        estado = C_FINALIZAR
+                        continue
+                    elif udp_hole == -2 or tcp_hole == -2:
+                        # print("erro ao abrir buracos do cliente")
+                        estado = C_FINALIZAR
+                        continue
 
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
@@ -308,6 +310,27 @@ class PoC:
                             self.gonnaTest = False
                             estado = S_TESTAR
                             break
+
+                elif estado is S_TESTAR:
+
+                    if max_retr == 0:
+                        estado = S_FINALIZAR
+                        continue
+                    max_retr -= 1
+
+                    #abre buracos por onde o cliente ira realizar o teste
+                    udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+                    tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+                    if udp_hole == -1 or tcp_hole == -1:
+                        # print("erro ao dar bind nos sockets do cliente")
+                        estado = S_FINALIZAR
+                        continue
+                    elif udp_hole == -2 or tcp_hole == -2:
+                        # print("erro ao abrir buracos do cliente")
+                        estado = S_FINALIZAR
+                        continue
+
                     time1 = datetime.now()
                     keep_tcp.stop()
                     keep_udp.stop()
@@ -324,12 +347,6 @@ class PoC:
                     socket_tcp.close()
                     socket_udp.close()
                     elapsed_time = datetime.now() - time1
-                elif estado is S_TESTAR:
-
-                    if max_retr == 0:
-                        estado = S_FINALIZAR
-                        continue
-                    max_retr -= 1
 
                     # nao precisa de tunnel udp aqui pq ja vai receber no porto certo
                     serverRunning = True
@@ -648,16 +665,6 @@ class PoC:
         if ip_peer == "":
             return retorno
 
-        udp_hole, socket_udp, keep_udp = self.open_udp_hole()
-        tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
-
-        if udp_hole == -1 or tcp_hole == -1:
-            # print("erro ao dar bind nos sockets do cliente")
-            return retorno
-        elif udp_hole == -2 or tcp_hole == -2:
-            # print("erro ao abrir buracos do cliente")
-            return retorno
-
         if my_role is CLIENT:
 
             c = iperf3.Client()
@@ -675,6 +682,18 @@ class PoC:
                         estado = C_FINALIZAR
                         continue
                     max_retr -= 1
+
+                    udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+                    tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+                    if udp_hole == -1 or tcp_hole == -1:
+                        # print("erro ao dar bind nos sockets do cliente")
+                        estado = C_FINALIZAR
+                        continue
+                    elif udp_hole == -2 or tcp_hole == -2:
+                        # print("erro ao abrir buracos do cliente")
+                        estado = C_FINALIZAR
+                        continue
 
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
@@ -768,6 +787,27 @@ class PoC:
                             self.gonnaTest = False
                             estado = S_TESTAR
                             break
+
+                elif estado is S_TESTAR:
+
+                    if max_retr == 0:
+                        estado = S_FINALIZAR
+                        continue
+                    max_retr -= 1
+
+                    # abre buracos por onde o cliente ira realizar o teste
+                    udp_hole, socket_udp, keep_udp = self.open_udp_hole()
+                    tcp_hole, socket_tcp, keep_tcp = self.open_tcp_hole()
+
+                    if udp_hole == -1 or tcp_hole == -1:
+                        # print("erro ao dar bind nos sockets do cliente")
+                        estado = S_FINALIZAR
+                        continue
+                    elif udp_hole == -2 or tcp_hole == -2:
+                        # print("erro ao abrir buracos do cliente")
+                        estado = S_FINALIZAR
+                        continue
+
                     time1 = datetime.now()
                     keep_tcp.stop()
                     keep_udp.stop()
@@ -784,12 +824,6 @@ class PoC:
                     socket_tcp.close()
                     socket_udp.close()
                     elapsed_time = datetime.now() - time1
-                elif estado is S_TESTAR:
-
-                    if max_retr == 0:
-                        estado = S_FINALIZAR
-                        continue
-                    max_retr -= 1
 
                     cmd = "socat -d -d udp-listen:" + str(self.udp_local_port) + ",reuseaddr udp:localhost:" + str(
                         self.iperf_port)
