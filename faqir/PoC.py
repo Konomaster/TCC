@@ -698,11 +698,13 @@ class PoC:
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
 
+                    flagServerAnswered=False
                     # esperar por tantos segundos o servidor falar que ja ta pronto (28)
                     for i in range(0, 32):
                         sleep(0.5)
                         if self.serverReady:
                             self.serverReady = False
+                            flagServerAnswered = True
                             estado = C_TESTAR
                             break
 
@@ -710,7 +712,8 @@ class PoC:
                     keep_udp.stop()
                     keep_tcp.join()
                     keep_udp.join()
-                    socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.server_tcp_hole))
+                    if flagServerAnswered:
+                        socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.server_tcp_hole))
                     socket_tcp.close()
                     socket_udp.close()
 
@@ -735,7 +738,8 @@ class PoC:
                     tunnelVolta = Popen(cmd2.split())
                     client_exec = Popen(cmdclient.split())
                     try:
-                        client_exec.wait(10)
+                        sleep(10)
+                        client_exec.wait(1)
                     except:
                         print('exception no teste (cliente)')
                         exception = True
@@ -843,7 +847,7 @@ class PoC:
                     s = Popen(cmdserver.split())
 
                     retry = False
-                    for i in range(0, 15):
+                    for i in range(0, 10):
                         sleep(1)
                         if self.gonnaTest:
                             self.gonnaTest = False
