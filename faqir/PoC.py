@@ -147,7 +147,9 @@ class PoC:
                 sum+=int(line.split(' ')[1].replace('.',''))
             index+=1
         file.close()
-        latency = (sum/index) / 1e3
+        #converte de us (microssegundos) em ms (milissegundos)
+        #1e5 = 1e3 + 1e2 pra compensar as casas decimais que eu desconsiderei acima
+        latency = (sum/index) / 1e5
         return latency
 
 
