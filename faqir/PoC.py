@@ -144,7 +144,7 @@ class PoC:
         sum = 0
         for line in file.readlines():
             if index>0:
-                sum+=int(line.split('')[1].replace('.',''))
+                sum+=int(line.split(' ')[1].replace('.',''))
             index+=1
         file.close()
         latency = (sum/index) / 1e3
