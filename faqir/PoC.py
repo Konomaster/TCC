@@ -138,10 +138,20 @@ class PoC:
             bits = average * 8.0 * math.pow(1024.0, 8.0)
         return int(bits)
 
-    def extract_latency(self, result):
-        pass
+    def calculate_latency(self):
+        file = open('udp_packetn_latency_pairs')
+        index = 0
+        sum = 0
+        for line in file.readlines():
+            if index>0:
+                sum+=int(line.split('')[1].replace('.',''))
+            index+=1
+        file.close()
+        latency = (sum/index) / 1e3
+        return latency
 
-    def save_results(self, throughput, result, latency):
+
+    def save_results(self, throughput, result):
         result_string = str(throughput)
         i = 0
         unit = -1
@@ -172,6 +182,8 @@ class PoC:
             result_string = result_string + " Zbits/s"
         elif unit == 8:
             result_string = result_string + " Ybits/s"
+
+        latency = self.calculate_latency()
         result_string = result_string + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(result.jitter_ms,
                                                                                                 result.lost_percent,
                                                                                                 latency)
@@ -414,7 +426,7 @@ class PoC:
 
         return retorno
 
-    def metrics_test(self, direcao):
+    def jitter_loss_test(self, direcao):
 
         self.endTest = False
         retorno = False
@@ -522,7 +534,7 @@ class PoC:
                             print("result error: " + result.error)
                             estado = C_INICIAR
                         else:
-                            self.save_results(c.bandwidth, result, 0)
+                            self.save_results(c.bandwidth, result)
                             # print("teste concluido com sucesso")
 
                             estado = C_RECEBER_RESULTADOS
@@ -944,21 +956,20 @@ class PoC:
             self.select_peer()
             #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
+                print("indo pro teste de vazao")
                 self.throughput_test("normal")
                 self.throughput_test("reverso")
-                print("indo pro teste de jitter e perda")
-                self.metrics_test("normal")
-                self.metrics_test("reverso")
-                print("indo pro teste udp reverso")
+                print("indo pro teste de latencia")
                 self.latency_test("normal")
                 self.latency_test("reverso")
+                print("indo pro teste de jitter e perda")
+                self.jitter_loss_test("normal")
+                self.jitter_loss_test("reverso")
                 print("acabou todos os testes")
                 sleep(DELAY_BUSCA)
                 self.offer_thread.set_peers([])
                 self.offer_thread.set_found_peer((False, "undefined"))
                 print("found peer = False\n")
-            else:
-                print("ainda nao achou peer\n")
             sleep(5)
 
     def listen(self):
