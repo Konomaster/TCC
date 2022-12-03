@@ -11,7 +11,8 @@ import psutil
 from stun import open_hole, KeepHoleAlive
 from peer_offer_thread import PeerOfferThread
 import random
-
+from contextlib import contextmanager
+import signal
 import io
 import sys
 
@@ -60,6 +61,19 @@ class PoC:
         self.endTest = False
 
         self.offer_thread = PeerOfferThread(self.s2, NUM_RETRANSMISSOES, OFFER_TIMEOUT)
+
+    #https://stackoverflow.com/questions/366682/how-to-limit-execution-time-of-a-function-call
+    @contextmanager
+    def time_limit(seconds):
+        def signal_handler(signum, frame):
+            raise Exception("Timed out!")
+
+        signal.signal(signal.SIGALRM, signal_handler)
+        signal.alarm(seconds)
+        try:
+            yield
+        finally:
+            signal.alarm(0)
 
     def seleciona_par(self, direcao):
 
@@ -525,7 +539,8 @@ class PoC:
                     try:
 
                         # print("cliente iniciando teste")
-                        result = c.run()
+                        with self.time_limit():
+                            result = c.run()
 
                     except:
                         print('exception no teste (cliente)')

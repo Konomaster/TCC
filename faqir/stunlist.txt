@@ -1,1 +1,2 @@
+stun2.l.google.com 19302
 stun.stunprotocol.org 3478
