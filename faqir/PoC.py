@@ -5,15 +5,12 @@ import socket
 import subprocess
 import threading
 from time import sleep
-from subprocess import Popen, PIPE, TimeoutExpired, DEVNULL
+from subprocess import Popen, PIPE, DEVNULL
 import iperf3
 import psutil
 from stun import open_hole, KeepHoleAlive
 from peer_offer_thread import PeerOfferThread
 import random
-from contextlib import contextmanager
-import signal
-import io
 import sys
 
 DELAY_BUSCA = 5  # seconds
@@ -61,19 +58,6 @@ class PoC:
         self.endTest = False
 
         self.offer_thread = PeerOfferThread(self.s2, NUM_RETRANSMISSOES, OFFER_TIMEOUT)
-
-    #https://stackoverflow.com/questions/366682/how-to-limit-execution-time-of-a-function-call
-    @contextmanager
-    def time_limit(seconds):
-        def signal_handler(signum, frame):
-            raise Exception("Timed out!")
-
-        signal.signal(signal.SIGALRM, signal_handler)
-        signal.alarm(seconds)
-        try:
-            yield
-        finally:
-            signal.alarm(0)
 
     def seleciona_par(self, direcao):
 
@@ -167,7 +151,7 @@ class PoC:
         return latency
 
 
-    def save_results(self, throughput, result):
+    def save_results(self, throughput, jitter_ms, lost_percent):
         result_string = str(throughput)
         i = 0
         unit = -1
@@ -200,8 +184,8 @@ class PoC:
             result_string = result_string + " Ybits/s"
 
         latency = self.calculate_latency()
-        result_string = result_string + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(result.jitter_ms,
-                                                                                                result.lost_percent,
+        result_string = result_string + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(jitter_ms,
+                                                                                                lost_percent,
                                                                                                 latency)
         result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ", Vazao: " + result_string
         file = open("results.txt", "a")
@@ -458,8 +442,6 @@ class PoC:
 
         if my_role is CLIENT:
 
-            c = iperf3.Client()
-
             C_INICIAR = 1
             C_TESTAR = 2
             C_RECEBER_RESULTADOS = 3
@@ -485,21 +467,6 @@ class PoC:
                         # print("erro ao abrir buracos do cliente")
                         estado = C_FINALIZAR
                         continue
-
-                    c = iperf3.Client()
-                    c.server_hostname = "localhost"
-                    c.port = self.iperf_port
-                    # hole punch eh udp
-                    c.protocol = 'udp'
-                    # deixar iperf determinar o tamanho do bloco
-                    c.blksize = 1450
-                    # trocar esse valor depois pelo que der no tcp
-                    if self.bits_per_sec_peer > self.bits_per_sec_self:
-                        c.bandwidth = self.bits_per_sec_self
-                    else:
-                        c.bandwidth = self.bits_per_sec_peer
-                    if c.bandwidth == 0:
-                        c.bandwidth = 1000000
 
                     gonnaString = "gonnaTest," + id_peer + "," + str(udp_hole) + "," + str(tcp_hole)
                     self.s2.sendto(gonnaString.encode('utf-8'), ("0.0.0.0", 37711))
@@ -533,32 +500,51 @@ class PoC:
                     cmd2 = "socat -d -d udp-listen:" + str(self.iperf_port) + ",reuseaddr udp:" + ip_peer + ":" + str(
                         self.server_udp_hole) + ",sp=" + str(self.udp_local_port)
 
+                    if self.bits_per_sec_peer > self.bits_per_sec_self:
+                        bandwidth = self.bits_per_sec_self
+                    else:
+                        bandwidth = self.bits_per_sec_peer
+                    if bandwidth == 0:
+                        bandwidth = 1000000
+
+                    cmdWrapper = "python3 wrapper_iperf3.py "+str(self.iperf_port)+" "+str(bandwidth)
+
                     tunnelTCP_UDP = Popen(cmd.split())
                     tunnelUDP = Popen(cmd2.split())
-                    result = ""
+                    wrapperCall = Popen(cmdWrapper.split(),stdout=PIPE)
                     try:
 
                         # print("cliente iniciando teste")
-                        with self.time_limit(12):
-                            result = c.run()
+                            sleep(14)
+                            wrapperCall.wait(1)
 
                     except:
-                        print('exception no teste (cliente)')
+                        print('exception no teste (cliente entrou em deadlock):')
                         estado = C_INICIAR
 
-                    if result != "" or result != None:
-                        if result.error:
-                            print("result error: " + result.error)
-                            estado = C_INICIAR
-                        else:
-                            self.save_results(c.bandwidth, result)
-                            # print("teste concluido com sucesso")
-
-                            estado = C_RECEBER_RESULTADOS
                     # fecha os tuneis
-                    self.close_processes([tunnelTCP_UDP.pid, tunnelUDP.pid])
+                    self.close_processes([wrapperCall.pid,tunnelTCP_UDP.pid, tunnelUDP.pid])
                     self.server_udp_hole = 0
-                    self.server_udp_hole = 0
+                    self.server_tcp_hole = 0
+
+                    if estado == C_INICIAR:
+                        continue
+
+                    jitter_ms=0
+                    lost_percent=0
+
+                    result_index=0
+                    for line in wrapperCall.stdout:
+                        line = line.decode('utf-8').rstrip('\n')
+                        if result_index == 0:
+                            jitter_ms = line
+                            result_index+=1
+                        else:
+                            lost_percent = line
+
+                    self.save_results(bandwidth, jitter_ms, lost_percent)
+                    estado = C_RECEBER_RESULTADOS
+
 
                 if estado is C_RECEBER_RESULTADOS:
                     # ignorar serverReadies duplos que vierem por qualquer motivo
@@ -973,15 +959,15 @@ class PoC:
             self.select_peer()
             #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
+                print("indo pro teste de jitter e perda")
+                self.jitter_loss_test("normal")
+                self.jitter_loss_test("reverso")
                 print("indo pro teste de vazao")
                 self.throughput_test("normal")
                 self.throughput_test("reverso")
                 print("indo pro teste de latencia")
                 self.latency_test("normal")
                 self.latency_test("reverso")
-                print("indo pro teste de jitter e perda")
-                self.jitter_loss_test("normal")
-                self.jitter_loss_test("reverso")
                 print("acabou todos os testes")
                 sleep(DELAY_BUSCA)
                 self.offer_thread.set_peers([])
