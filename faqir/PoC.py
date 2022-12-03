@@ -539,7 +539,7 @@ class PoC:
                     try:
 
                         # print("cliente iniciando teste")
-                        with self.time_limit():
+                        with self.time_limit(12):
                             result = c.run()
 
                     except:
