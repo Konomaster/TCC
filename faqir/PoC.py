@@ -1,5 +1,6 @@
 import math
 import os.path
+import signal
 from datetime import datetime
 import socket
 import subprocess
@@ -58,6 +59,7 @@ class PoC:
         self.endTest = False
 
         self.offer_thread = PeerOfferThread(self.s2, NUM_RETRANSMISSOES, OFFER_TIMEOUT)
+        self.offer_thread.setDaemon(True)
 
     def seleciona_par(self, direcao):
 
@@ -968,6 +970,9 @@ class PoC:
                 print("indo pro teste de jitter e perda")
                 self.jitter_loss_test("normal")
                 self.jitter_loss_test("reverso")
+                print("rodando teste speedtest")
+                cli_test = Popen("python3 speedtest.py".split())
+                cli_test.wait()
                 print("acabou todos os testes")
                 sleep(DELAY_BUSCA)
                 self.offer_thread.set_peers([])
@@ -1124,10 +1129,14 @@ def main():
     pnthread1 = threading.Thread(target=peerNetwork, daemon=True)
     pnthread1.start()
 
-    input("sair?")
+    signal.signal(signal.SIGINT,signal_handler)
+    # se tirar isso é como se executasse o programa no terminal com & depois e ele não pegaria o sigint
+    proof_of_concept.offer_thread.join()
     # continueProgram=True
     # while continueProgram
 
+def signal_handler(sig, frame):
+    sys.exit(0)
 
 if __name__ == '__main__':
     main()
