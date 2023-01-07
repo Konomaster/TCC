@@ -23,11 +23,11 @@ def main():
     test_result = datetime.now().strftime("%Y-%m-%d %H:%M:%S")\
                   +", Vazao: "+bps_scale(bps)\
                   +", Jitter: {} ms, Lost: {} %, Latencia: {} ms, Provedor: {}, Servidor: {}\n"\
-                      .format(dict_out['ping']['jitter'],
-                              dict_out['packetLoss'],
-                              dict_out['ping']['latency'],
-                              dict_out['isp'],
-                              dict_out['server']['name'])
+                      .format(dict_out['ping']['jitter'] if 'ping' in dict_out.keys else "0",
+                              dict_out['packetLoss'] if 'packetLoss' in dict_out.keys else "0",
+                              dict_out['ping']['latency'] if 'ping' in dict_out.keys else "0",
+                              dict_out['isp'] if 'isp' in dict_out.keys else "0",
+                              dict_out['server']['name'] if 'server' in dict_out.keys else "0")
 
     file = open("results_speedtest.txt", "a")
     file.write(test_result)
