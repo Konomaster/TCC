@@ -1,5 +1,4 @@
 import math
-import os.path
 import signal
 from datetime import datetime
 import socket
@@ -8,11 +7,11 @@ import threading
 from time import sleep
 from subprocess import Popen, PIPE, DEVNULL
 import iperf3
-import psutil
 from stun import open_hole, KeepHoleAlive
 from peer_offer_thread import PeerOfferThread
 import random
 import sys
+from utils import close_processes, bps_scale
 
 DELAY_BUSCA = 5  # seconds
 NUM_RETRANSMISSOES = 1
@@ -154,39 +153,11 @@ class PoC:
 
 
     def save_results(self, throughput, jitter_ms, lost_percent):
-        result_string = str(throughput)
-        i = 0
-        unit = -1
-        point = 0
-        while i < len(result_string):
-            if i % 3 == 0 and unit < 8:
-                unit += 1
-                point = i
-            i += 1
-        if point > 2:
-            result_string = result_string[:len(result_string) - point] + "." + result_string[
-                                                                               len(result_string) - point:]
-        if unit < 1:
-            result_string = result_string + " bits/s"
-        elif unit == 1:
-            result_string = result_string + " Kbits/s"
-        elif unit == 2:
-            result_string = result_string + " Mbits/s"
-        elif unit == 3:
-            result_string = result_string + " Gbits/s"
-        elif unit == 4:
-            result_string = result_string + " Tbits/s"
-        elif unit == 5:
-            result_string = result_string + " Pbits/s"
-        elif unit == 6:
-            result_string = result_string + " Ebits/s"
-        elif unit == 7:
-            result_string = result_string + " Zbits/s"
-        elif unit == 8:
-            result_string = result_string + " Ybits/s"
+
+        bps_scale(throughput)
 
         latency = self.calculate_latency()
-        result_string = result_string + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(jitter_ms,
+        result_string = bps_scale(throughput) + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(jitter_ms,
                                                                                                 lost_percent,
                                                                                                 latency)
         result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ", Vazao: " + result_string
@@ -275,7 +246,7 @@ class PoC:
                         t2 = Popen(str2.split(), stdin=t1.stdout)
                         t1.stdout.close()
                         sleep(10)
-                        self.close_processes([t1.pid, t2.pid])
+                        close_processes([t1.pid, t2.pid])
                         for line in t1.stderr:
                             step = line.decode('utf-8').split("\r")[-2].lstrip("[").rstrip("]")
                             self.bits_per_sec_sender = self.extract_throughput(step)
@@ -383,7 +354,7 @@ class PoC:
                             retry = True
                             break
 
-                    self.close_processes([t1.pid, t2.pid])
+                    close_processes([t1.pid, t2.pid])
 
                     if retry:
                         continue
@@ -518,14 +489,14 @@ class PoC:
 
                         # print("cliente iniciando teste")
                             sleep(14)
-                            wrapperCall.wait(1)
+                            wrapperCall.wait(6)
 
                     except:
                         print('exception no teste (cliente entrou em deadlock):')
                         estado = C_INICIAR
 
                     # fecha os tuneis
-                    self.close_processes([wrapperCall.pid,tunnelTCP_UDP.pid, tunnelUDP.pid])
+                    close_processes([wrapperCall.pid,tunnelTCP_UDP.pid, tunnelUDP.pid])
                     self.server_udp_hole = 0
                     self.server_tcp_hole = 0
 
@@ -647,7 +618,7 @@ class PoC:
                             retry = True
                             break
 
-                    self.close_processes([tunnelTCP_UDP.pid, s.pid])
+                    close_processes([tunnelTCP_UDP.pid, s.pid])
 
                     if retry:
                         continue
@@ -782,7 +753,7 @@ class PoC:
                     if not exception:
                         estado = C_RECEBER_RESULTADOS
                     # fecha os tuneis
-                    self.close_processes([tunnelIda.pid, tunnelVolta.pid, client_exec.pid])
+                    close_processes([tunnelIda.pid, tunnelVolta.pid, client_exec.pid])
                     self.server_udp_hole = 0
                     self.server_udp_hole = 0
 
@@ -888,7 +859,7 @@ class PoC:
                             retry = True
                             break
 
-                    self.close_processes([tunnelVinda.pid, tunnelIda.pid, s.pid])
+                    close_processes([tunnelVinda.pid, tunnelIda.pid, s.pid])
 
                     if retry:
                         continue
@@ -1095,20 +1066,6 @@ class PoC:
 
         return -2, -2, -2
 
-    def close_processes(self, pid_list):
-        for pid in pid_list:
-            if not psutil.pid_exists(pid):
-                continue
-            parent = psutil.Process(pid)
-            for child in parent.children(recursive=True):
-                try:
-                    child.kill()
-                except:
-                    pass
-            try:
-                parent.kill()
-            except:
-                pass
 
 
 def peerNetwork():

@@ -1,7 +1,7 @@
 import json
 from subprocess import Popen, PIPE
 from datetime import datetime
-from utils import to_bps, close_processes
+from utils import bps_scale, close_processes
 
 # curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
 #  2023  sudo apt install speedtest
@@ -19,9 +19,9 @@ def main():
 
     json_out=json_out.decode('utf-8')
     dict_out=json.loads(json_out)
-    bits = dict_out['download']['bandwidth'] * 8
+    bps = dict_out['download']['bandwidth'] * 8
     test_result = datetime.now().strftime("%Y-%m-%d %H:%M:%S")\
-                  +", Vazao: "+to_bps(bits)\
+                  +", Vazao: "+bps_scale(bps)\
                   +", Jitter: {} ms, Lost: {} %, Latencia: {} ms, Provedor: {}, Servidor: {}\n"\
                       .format(dict_out['ping']['jitter'],
                               dict_out['packetLoss'],
