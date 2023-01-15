@@ -157,9 +157,11 @@ class PoC:
         bps_scale(throughput)
 
         latency = self.calculate_latency()
-        result_string = bps_scale(throughput) + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms\n".format(jitter_ms,
-                                                                                                lost_percent,
-                                                                                                latency)
+        result_string = bps_scale(throughput) + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms," \
+                                                "Par: {}\n".format(jitter_ms,
+                                                                lost_percent,
+                                                                latency,
+                                                                str(self.offer_thread.get_found_peer()))
         result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ", Vazao: " + result_string
         file = open("results.txt", "a")
 
@@ -489,7 +491,7 @@ class PoC:
 
                         # print("cliente iniciando teste")
                             sleep(16)
-                            wrapperCall.wait(6)
+                            wrapperCall.wait(3)
 
                     except:
                         print('exception no teste (cliente entrou em deadlock):')

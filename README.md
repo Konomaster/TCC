@@ -5,12 +5,8 @@
 ## Para rodar a prova de conceito:
 
 	sudo apt update
-
-	sudo apt install nodejs 
-
-	sudo apt install pv 
 	
-	sudo apt install socat
+	sudo apt install -y --no-install-recommends nodejs npm pv socat python3-pip git build-essential vim ncat
 
 	pip3 install iperf3 
 
@@ -31,7 +27,17 @@
 	sudo ldconfig
 
 	cd ..
+	
+### Instalando o SpeedTest-cli
+	
+	sudo apt install -y --no-install-recommends curl
+	
+	curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash
+	
+	sudo apt install -y --no-install-recommends speedtest
 
+	speedtest (aceite a licença)
+	
 ### Instalando a Prova de Conceito:
 
 	git clone https://github.com/Konomaster/TCC.git
@@ -42,13 +48,7 @@
 
 	cd stunserver
 
-	sudo apt-get install g++
-
-	sudo apt-get install make
-
-	sudo apt-get install libboost-dev
-
-	sudo apt-get install libssl-dev
+	sudo apt install -y --no-install-recommends g++ make libboost-dev libssl-dev
 
 	make
 
@@ -72,3 +72,4 @@
 	
 	no teste udp (aprox linha 270 do arquivo PoC.py) trocar o c = iperf3.Client() por c = iperf3.Client(lib_name="<caminho da biblioteca>")
 	
+### 
