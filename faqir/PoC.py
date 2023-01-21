@@ -157,7 +157,7 @@ class PoC:
         bps_scale(throughput)
 
         latency = self.calculate_latency()
-        result_string = bps_scale(throughput) + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms," \
+        result_string = bps_scale(throughput) + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms, " \
                                                 "Par: {}\n".format(jitter_ms,
                                                                 lost_percent,
                                                                 latency,
@@ -475,10 +475,7 @@ class PoC:
                     cmd2 = "socat -d -d udp-listen:" + str(self.iperf_port) + ",reuseaddr udp:" + ip_peer + ":" + str(
                         self.server_udp_hole) + ",sp=" + str(self.udp_local_port)
 
-                    if self.bits_per_sec_peer > self.bits_per_sec_self:
-                        bandwidth = self.bits_per_sec_self
-                    else:
-                        bandwidth = self.bits_per_sec_peer
+                    bandwidth = self.bits_per_sec_self
                     if bandwidth == 0:
                         bandwidth = 1000000
 
