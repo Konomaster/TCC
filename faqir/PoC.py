@@ -674,8 +674,6 @@ class PoC:
 
         if my_role is CLIENT:
 
-            c = iperf3.Client()
-
             C_INICIAR = 1
             C_TESTAR = 2
             C_RECEBER_RESULTADOS = 3
