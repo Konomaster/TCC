@@ -13,7 +13,7 @@ import random
 import sys
 from utils import close_processes, bps_scale
 
-DELAY_BUSCA = 5  # seconds
+DELAY_BUSCA = 60 * 15  # seconds
 NUM_RETRANSMISSOES = 1
 NUM_RETRANSMISSOES_TESTE = 3
 NUM_PARES_BUSCA = 3
@@ -949,7 +949,7 @@ class PoC:
                 self.offer_thread.set_peers([])
                 self.offer_thread.set_found_peer((False, "undefined"))
                 print("found peer = False\n")
-            sleep(60*15)
+            sleep(5)
 
     def listen(self):
         if self.porta_udp > 0:
