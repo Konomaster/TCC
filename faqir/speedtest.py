@@ -12,7 +12,7 @@ def main():
 
     test = Popen(cmd.split(), stdout=PIPE)
     try:
-        json_out, _ = test.communicate(30)
+        json_out, _ = test.communicate(40)
     except:
         close_processes(test)
         exit(1)

@@ -240,8 +240,8 @@ class PoC:
                     sleep(1)
 
                     try:
-                        # str1="pv -f -B 1450 -a /dev/random"
-                        str1 = "pv -f -B 1450 -a stun.py"
+                        str1 = "pv -f -B 1450 -a /dev/random"
+                        # str1 = "pv -f -B 1450 -a stun.py"
                         str2 = "socat -b 1450 - udp:" + ip_peer + ":" + str(self.server_udp_hole) + ",sp=" + str(
                             self.udp_local_port)
                         t1 = Popen(str1.split(), stderr=PIPE, stdout=PIPE)
@@ -949,7 +949,7 @@ class PoC:
                 self.offer_thread.set_peers([])
                 self.offer_thread.set_found_peer((False, "undefined"))
                 print("found peer = False\n")
-            sleep(5)
+            sleep(60*15)
 
     def listen(self):
         if self.porta_udp > 0:
