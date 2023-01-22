@@ -18,7 +18,7 @@ NUM_RETRANSMISSOES = 1
 NUM_RETRANSMISSOES_TESTE = 3
 NUM_PARES_BUSCA = 3
 OFFER_TIMEOUT = 3  # seconds
-BLKSIZE = 1400 # tamanho do bloco udp
+BLKSIZE = 1450 # tamanho do bloco udp
 
 CLIENT = 1
 SERVER = 0
