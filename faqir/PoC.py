@@ -158,8 +158,8 @@ class PoC:
     def save_results(self, jitter_ms, lost_percent):
 
         result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") +\
-                        ", Min Download: " + bps_scale(self.my_min_download) +\
-                        ", Min Upload: " + bps_scale(self. my_min_upload) +\
+                        ", Min Download: " + bps_scale(self.my_minimum_download) +\
+                        ", Min Upload: " + bps_scale(self. my_minimum_upload) +\
                         ", Jitter: {} ms, Lost: {} %, Latencia: {} ms, " \
                                                 "Par: {}\n".format(jitter_ms,
                                                                 lost_percent,
