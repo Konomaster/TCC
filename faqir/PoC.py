@@ -53,8 +53,10 @@ class PoC:
         self.udp_local_port = 3000
         self.tcp_local_port = 3001
         self.bits_per_sec_sender = 0
-        self.bits_per_sec_self = 0
-        self.bits_per_sec_peer = 0
+        # equals peer's minimum download
+        self.my_minimum_upload = 0
+        # equals peer's minimum upload
+        self.my_minimum_download = 0
         self.endTest = False
 
         self.offer_thread = PeerOfferThread(self.s2, NUM_RETRANSMISSOES, OFFER_TIMEOUT)
@@ -152,17 +154,16 @@ class PoC:
         return latency
 
 
-    def save_results(self, throughput, jitter_ms, lost_percent):
+    def save_results(self, jitter_ms, lost_percent):
 
-        bps_scale(throughput)
-
-        latency = self.calculate_latency()
-        result_string = bps_scale(throughput) + ", Jitter: {} ms, Lost: {} %, Latencia: {} ms, " \
+        result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") +\
+                        ", Min Download: " + bps_scale(self.my_min_download) +\
+                        ", Min Upload: " + bps_scale(self. my_min_upload) +\
+                        ", Jitter: {} ms, Lost: {} %, Latencia: {} ms, " \
                                                 "Par: {}\n".format(jitter_ms,
                                                                 lost_percent,
-                                                                latency,
+                                                                self.calculate_latency(),
                                                                 str(self.offer_thread.get_found_peer()))
-        result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ", Vazao: " + result_string
         file = open("results.txt", "a")
 
         file.write(result_string)
@@ -249,6 +250,7 @@ class PoC:
                         t1.stdout.close()
                         sleep(10)
                         close_processes([t1.pid, t2.pid])
+                        #na verdade so tem 1 linhas
                         for line in t1.stderr:
                             step = line.decode('utf-8').split("\r")[-2].lstrip("[").rstrip("]")
                             self.bits_per_sec_sender = self.extract_throughput(step)
@@ -283,7 +285,7 @@ class PoC:
             S_ENVIAR_RESULTADOS = 3
             S_FINALIZAR = 5
 
-            client_result = "0.00 B/s"
+            my_down = "0.00 B/s"
 
             while estado != S_FINALIZAR:
 
@@ -371,9 +373,9 @@ class PoC:
                             if bits > max_bits:
                                 max_bits = bits
                                 max = clean_step
-                        self.bits_per_sec_peer = max_bits
+                        self.my_minimum_download = max_bits
                         break
-                    client_result = max.replace(",", ".")
+                    my_down = max.replace(",", ".")
                     estado = S_ENVIAR_RESULTADOS
 
                 elif estado is S_ENVIAR_RESULTADOS:
@@ -385,9 +387,9 @@ class PoC:
                     result_retr -= 1
 
                     # envia resultado ao par
-                    vazao = "endTest," + id_peer + "," + client_result
+                    vazao = "endTest," + id_peer + "," + my_down
                     self.s2.sendto(vazao.encode('utf-8'), ("0.0.0.0", 37711))
-
+                    print("Meu Download: "+my_down)
                     # timeout de 3 secs
                     for i in range(0, result_retr_timeout):
                         sleep(0.5)
@@ -475,7 +477,7 @@ class PoC:
                     cmd2 = "socat -d -d udp-listen:" + str(self.iperf_port) + ",reuseaddr udp:" + ip_peer + ":" + str(
                         self.server_udp_hole) + ",sp=" + str(self.udp_local_port)
 
-                    bandwidth = self.bits_per_sec_self
+                    bandwidth = self.my_minimum_upload
                     if bandwidth == 0:
                         bandwidth = 1000000
 
@@ -514,7 +516,7 @@ class PoC:
                         else:
                             lost_percent = line
 
-                    self.save_results(bandwidth, jitter_ms, lost_percent)
+                    self.save_results(jitter_ms, lost_percent)
                     estado = C_RECEBER_RESULTADOS
 
 
@@ -542,8 +544,6 @@ class PoC:
             S_TESTAR = 2
             S_ENVIAR_RESULTADOS = 3
             S_FINALIZAR = 5
-
-            client_result = "0.00 B/s"
 
             while estado != S_FINALIZAR:
 
@@ -779,7 +779,6 @@ class PoC:
             S_ENVIAR_RESULTADOS = 3
             S_FINALIZAR = 5
 
-            client_result = "0.00 B/s"
 
             while estado != S_FINALIZAR:
 
@@ -930,7 +929,9 @@ class PoC:
             #   print("chamou select peer")
             if self.offer_thread.get_found_peer() and self.hole_port1 > 0:
                 print("indo pro teste de vazao")
+                # mede meu upload
                 self.throughput_test("normal")
+                # mede meu download
                 self.throughput_test("reverso")
                 print("indo pro teste de latencia")
                 self.latency_test("normal")
@@ -989,11 +990,11 @@ class PoC:
                 self.client_udp_hole = int(splitData[1])
                 self.client_tcp_hole = int(splitData[2])
             elif splitData[0] == "vazao":
-                self.bits_per_sec_self = self.extract_throughput(splitData[1])
+                self.my_minimum_upload = self.extract_throughput(splitData[1])
             elif splitData[0] == "endTest" and self.offer_thread.get_found_peer() == splitData[len(splitData) - 1]:
                 self.endTest = True
                 if len(splitData) == 3:
-                    self.bits_per_sec_self = self.extract_throughput(splitData[1])
+                    self.my_minimum_upload = self.extract_throughput(splitData[1])
             elif splitData[0] == "endTest_ack" and self.offer_thread.get_found_peer() == splitData[len(splitData) - 1]:
                 self.endTest = True
             elif splitData[0] == "offer" and not self.offer_thread.get_found_peer():
