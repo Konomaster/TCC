@@ -18,6 +18,7 @@ NUM_RETRANSMISSOES = 1
 NUM_RETRANSMISSOES_TESTE = 3
 NUM_PARES_BUSCA = 3
 OFFER_TIMEOUT = 3  # seconds
+BLKSIZE = 1450 # tamanho do bloco udp
 
 CLIENT = 1
 SERVER = 0
@@ -241,9 +242,9 @@ class PoC:
                     sleep(1)
 
                     try:
-                        str1 = "pv -f -B 1450 -a /dev/random"
-                        # str1 = "pv -f -B 1450 -a stun.py"
-                        str2 = "socat -b 1450 - udp:" + ip_peer + ":" + str(self.server_udp_hole) + ",sp=" + str(
+                        str1 = "pv -f -B "+str(BLKSIZE)+" -a /dev/random"
+                        # str1 = "pv -f -B "+str(BLKSIZE)+" -a stun.py"
+                        str2 = "socat -b "+str(BLKSIZE)+" - udp:" + ip_peer + ":" + str(self.server_udp_hole) + ",sp=" + str(
                             self.udp_local_port)
                         t1 = Popen(str1.split(), stderr=PIPE, stdout=PIPE)
                         t2 = Popen(str2.split(), stdin=t1.stdout)
