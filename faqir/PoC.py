@@ -159,7 +159,7 @@ class PoC:
 
         result_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S") +\
                         ", Min Download: " + bps_scale(self.my_minimum_download) +\
-                        ", Min Upload: " + bps_scale(self. my_minimum_upload) +\
+                        ", Min Upload: " + bps_scale(self.my_minimum_upload) +\
                         ", Jitter: {} ms, Lost: {} %, Latencia: {} ms, " \
                                                 "Par: {}\n".format(jitter_ms,
                                                                 lost_percent,
