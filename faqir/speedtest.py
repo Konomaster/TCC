@@ -21,7 +21,8 @@ def main():
     dict_out=json.loads(json_out)
     bps = dict_out['download']['bandwidth'] * 8
     test_result = datetime.now().strftime("%Y-%m-%d %H:%M:%S")\
-                  +", Vazao: "+bps_scale(bps)\
+                  +", Download: "+bps_scale(bps)\
+                  +", Upload: "+bps_scale(dict_out['upload']['bandwidth'] * 8)\
                   +", Jitter: {} ms, Lost: {} %, Latencia: {} ms, Provedor: {}, Servidor: {}\n"\
                       .format(dict_out['ping']['jitter'] if 'ping' in dict_out.keys() else "0",
                               dict_out['packetLoss'] if 'packetLoss' in dict_out.keys() else "0",
