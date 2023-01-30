@@ -239,7 +239,6 @@ class PoC:
                         estado = C_FINALIZAR
                         continue
 
-                    sleep(1)
 
                     try:
                         str1 = "pv -f -B "+str(BLKSIZE)+" -a /dev/random"
@@ -332,7 +331,7 @@ class PoC:
                         socket_tcp.sendto("abrindo buraco tcp".encode('utf-8'), (ip_peer, self.client_tcp_hole))
                         socket_udp.sendto("abrindo buraco udp".encode('utf-8'), (ip_peer, self.client_udp_hole))
                         # make sure client doesnt get above messages
-                        sleep(3)
+                        sleep(4)
 
                     socket_tcp.close()
                     socket_udp.close()
