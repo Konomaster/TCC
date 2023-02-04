@@ -17,22 +17,25 @@ def main():
         close_processes(test)
         exit(1)
 
-    json_out=json_out.decode('utf-8')
-    dict_out=json.loads(json_out)
-    bps = dict_out['download']['bandwidth'] * 8
-    test_result = datetime.now().strftime("%Y-%m-%d %H:%M:%S")\
-                  +", Download: "+bps_scale(bps)\
-                  +", Upload: "+bps_scale(dict_out['upload']['bandwidth'] * 8)\
-                  +", Jitter: {} ms, Lost: {} %, Latencia: {} ms, Provedor: {}, Servidor: {}\n"\
-                      .format(dict_out['ping']['jitter'] if 'ping' in dict_out.keys() else "0",
-                              dict_out['packetLoss'] if 'packetLoss' in dict_out.keys() else "0",
-                              dict_out['ping']['latency'] if 'ping' in dict_out.keys() else "0",
-                              dict_out['isp'] if 'isp' in dict_out.keys() else "0",
-                              dict_out['server']['name'] if 'server' in dict_out.keys() else "0")
+    try:
+        json_out=json_out.decode('utf-8')
+        dict_out=json.loads(json_out)
+        bps = dict_out['download']['bandwidth'] * 8
+        test_result = datetime.now().strftime("%Y-%m-%d %H:%M:%S")\
+                      +", Download: "+bps_scale(bps)\
+                      +", Upload: "+bps_scale(dict_out['upload']['bandwidth'] * 8)\
+                      +", Jitter: {} ms, Lost: {} %, Latencia: {} ms, Provedor: {}, Servidor: {}\n"\
+                          .format(dict_out['ping']['jitter'] if 'ping' in dict_out.keys() else "0",
+                                  dict_out['packetLoss'] if 'packetLoss' in dict_out.keys() else "0",
+                                  dict_out['ping']['latency'] if 'ping' in dict_out.keys() else "0",
+                                  dict_out['isp'] if 'isp' in dict_out.keys() else "0",
+                                  dict_out['server']['name'] if 'server' in dict_out.keys() else "0")
 
-    file = open("results_speedtest.txt", "a")
-    file.write(test_result)
-    file.close()
+        file = open("results_speedtest.txt", "a")
+        file.write(test_result)
+        file.close()
+    except:
+        exit(1)
 
 if __name__ == '__main__':
     main()
