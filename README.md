@@ -53,8 +53,10 @@
 	
 ### Instalando o SpeedTest-cli
 
-Tambem serao realizadas aferições com o Speedtest, permitindo a comparação dos resultados 
+Também serão realizadas aferições com o Speedtest, permitindo a comparação dos resultados 
 da Peertest contra ele.
+
+Caso queira desabilitar o Speedtest, comente as linhas 943 e 944 no arquivo PoC.py
 	
 	sudo apt install -y --no-install-recommends curl
 	
@@ -69,7 +71,7 @@ da Peertest contra ele.
 	python3 PoC.py
 
 Os resultados das aferições estarão nos arquivos "results.txt" para a Peertest 
-e results_speedtest.tx para o Speedtest.
+e "results_speedtest.txt" para o Speedtest.
 
 ### Obs: talvez seja necessario colocar manualmente o caminho do libiperf.so.0
 
