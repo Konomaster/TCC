@@ -11,32 +11,6 @@
 	pip3 install iperf3 
 
 	pip3 install psutil  
-
-### Instalando o iperf3
-
-	git clone https://github.com/esnet/iperf.git iperf3
-
-	cd iperf3
-
-	./configure
-
-	make
-
-	sudo make install
-
-	sudo ldconfig
-
-	cd ..
-	
-### Instalando o SpeedTest-cli
-	
-	sudo apt install -y --no-install-recommends curl
-	
-	curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | bash
-	
-	sudo apt install -y --no-install-recommends speedtest
-
-	speedtest (aceite a licença)
 	
 ### Instalando a Prova de Conceito:
 
@@ -59,12 +33,43 @@
 	rm -r node_modules/@josaiasmoura
 
 	cp -r @josaiasmoura node_modules
+	
 
-	cd faqir/
+### Instalando o iperf3
+
+	git clone https://github.com/esnet/iperf.git iperf3
+
+	cd iperf3
+
+	./configure
+
+	make
+
+	sudo make install
+
+	sudo ldconfig
+
+	cd ../faqir
+	
+### Instalando o SpeedTest-cli
+
+Tambem serao realizadas aferições com o Speedtest, permitindo a comparação dos resultados 
+da Peertest contra ele.
+	
+	sudo apt install -y --no-install-recommends curl
+	
+	sudo curl -s https://packagecloud.io/install/repositories/ookla/speedtest-cli/script.deb.sh | sudo bash
+	
+	sudo apt install -y --no-install-recommends speedtest
+
+	speedtest
 
 ### Rodando a prova de conceito
 
 	python3 PoC.py
+
+Os resultados das aferições estarão nos arquivos "results.txt" para a Peertest 
+e results_speedtest.tx para o Speedtest.
 
 ### Obs: talvez seja necessario colocar manualmente o caminho do libiperf.so.0
 
