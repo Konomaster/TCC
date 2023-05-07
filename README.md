@@ -64,7 +64,7 @@ Caso queira desabilitar o Speedtest, comente as linhas 943 e 944 no arquivo PoC.
 	
 	sudo apt install -y --no-install-recommends speedtest
 
-	speedtest
+	speedtest (aceite as licenças)
 
 ### Rodando a prova de conceito
 
